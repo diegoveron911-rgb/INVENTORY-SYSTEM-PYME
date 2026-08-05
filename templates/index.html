@@ -192,9 +192,22 @@
         </div>
     </div>
 
-    <!-- PESTAÑA 1: INVENTARIO COMPLETO (Solo visible al presionar "Ver Inventario") -->
+   <!-- PESTAÑA 1: INVENTARIO COMPLETO Y EXPORTACIÓN -->
     <div id="inventario" class="tab-content">
-        <h2>📦 Productos en Stock</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2>📦 Productos en Stock</h2>
+            <a href="/exportar" class="btn-submit" style="text-decoration: none; padding: 10px 20px; width: auto; background: #27ae60;">📥 Descargar Inventario (Excel)</a>
+        </div>
+
+        <!-- Carga Masiva desde Excel -->
+        <div class="card" style="max-width: 100%; margin-bottom: 20px; padding: 15px;">
+            <h4 style="margin: 0 0 10px 0; color: #3498db;">📊 Cargar Listado Masivo (Excel)</h4>
+            <form action="/importar" method="POST" enctype="multipart/form-data" style="display: flex; gap: 15px; align-items: center;">
+                <input type="file" name="file" accept=".xlsx, .xls" required style="margin: 0;">
+                <button type="submit" class="btn-submit" style="margin: 0; width: 200px; padding: 10px; font-size: 16px;">Subir Planilla</button>
+            </form>
+        </div>
+
         <table>
             <thead>
                 <tr>

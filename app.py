@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 import sqlite3
+import pandas as pd
+import io
 from database import init_db
 
 app = Flask(__name__)
@@ -20,9 +22,7 @@ def index():
 def agregar():
     marca = request.form['marca']
     nombre_linea = request.form['nombre']
-    # Combinamos la marca con la línea para que quede ordenado (Ej: "AMA - Full Synthetic")
     nombre_completo = f"{marca} - {nombre_linea}"
-    
     viscosidad = request.form['viscosidad']
     presentacion = request.form['presentacion']
     codigo_barras = request.form.get('codigo_barras', '')
@@ -39,7 +39,6 @@ def agregar():
     ''', (codigo_barras, nombre_completo, viscosidad, presentacion, precio_costo, precio_venta, stock, stock_minimo))
     conn.commit()
     conn.close()
-    
     return redirect(url_for('index'))
 
 @app.route('/vender', methods=['POST'])
@@ -58,6 +57,46 @@ def vender():
         conn.commit()
     
     conn.close()
+    return redirect(url_for('index'))
+
+# --- NUEVA FUNCIÓN: EXPORTAR INVENTARIO A EXCEL ---
+@app.route('/exportar')
+def exportar():
+    conn = conectar()
+    df = pd.read_sql_query("SELECT id AS ID, codigo_barras AS Codigo, nombre AS Producto, viscosidad AS Viscosidad, presentacion AS Envase, precio_costo AS Costo, precio_venta AS Venta, stock_actual AS Stock FROM productos", conn)
+    conn.close()
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Inventario')
+    output.seek(0)
+
+    return send_file(output, download_name='Inventario_Oleos_Minerales.xlsx', as_attachment=True)
+
+# --- NUEVA FUNCIÓN: IMPORTAR LISTADO DESDE EXCEL ---
+@app.route('/importar', methods=['POST'])
+def importar():
+    file = request.files['file']
+    if file:
+        df = pd.read_excel(file)
+        conn = conectar()
+        cursor = conn.cursor()
+        for _, row in df.iterrows():
+            cursor.execute('''
+                INSERT INTO productos (codigo_barras, nombre, viscosidad, presentacion, precio_costo, precio_venta, stock_actual, stock_minimo)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                str(row.get('Codigo', '')),
+                str(row.get('Producto', '')),
+                str(row.get('Viscosidad', '')),
+                str(row.get('Envase', '')),
+                float(row.get('Costo', 0)),
+                float(row.get('Venta', 0)),
+                int(row.get('Stock', 0)),
+                5
+            ))
+        conn.commit()
+        conn.close()
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
