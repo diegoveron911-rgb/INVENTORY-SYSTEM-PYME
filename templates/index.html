@@ -5,92 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OLEOS MINERALES SRL - Sistema de Gestión</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            margin: 0; 
-            padding: 20px; 
-            background: #1e222d; 
-            color: #e1e6ed; 
-            font-size: 18px; 
-        }
-
-        .header-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #282d3b;
-            padding: 15px 30px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            border: 1px solid #3a4153;
-        }
-
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #1e222d; color: #e1e6ed; font-size: 18px; }
+        .header-container { display: flex; align-items: center; justify-content: space-between; background: #282d3b; padding: 15px 30px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #3a4153; }
         .header-title { font-size: 26px; font-weight: bold; color: #2ecc71; margin: 0; }
         .logos-group { display: flex; align-items: center; gap: 15px; }
         .logo-img { height: 40px; object-fit: contain; background: #ffffff; padding: 4px 8px; border-radius: 6px; }
 
-        .navbar { 
-            display: flex; 
-            justify-content: center; 
-            gap: 15px; 
-            margin-bottom: 25px; 
-            background: #282d3b; 
-            padding: 10px; 
-            border-radius: 8px;
-        }
-
-        .nav-btn { 
-            background: #3a4153; 
-            color: #fff; 
-            border: 2px solid #4a536b; 
-            padding: 12px 24px; 
-            border-radius: 6px; 
-            font-size: 18px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.2s;
-        }
-
+        .navbar { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; background: #282d3b; padding: 10px; border-radius: 8px; flex-wrap: wrap; }
+        .nav-btn { background: #3a4153; color: #fff; border: 2px solid #4a536b; padding: 12px 20px; border-radius: 6px; font-size: 17px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .nav-btn:hover, .nav-btn.active { background: #2ecc71; border-color: #27ae60; color: #111; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* TARJETA DE BIENVENIDA Y RELOJ */
-        .welcome-card {
-            background: #282d3b;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            max-width: 650px;
-            margin: 0 auto 20px auto;
-            border: 1px solid #3a4153;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.5);
-        }
-
+        .welcome-card { background: #282d3b; padding: 30px; border-radius: 12px; text-align: center; max-width: 650px; margin: 0 auto 20px auto; border: 1px solid #3a4153; box-shadow: 0 6px 15px rgba(0,0,0,0.5); }
         .main-logo-img { width: 100%; max-width: 380px; border-radius: 12px; margin-bottom: 15px; }
 
-        /* RELOJ EN TIEMPO REAL */
-        .clock-card {
-            background: #11141a;
-            border: 2px solid #2ecc71;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-        }
-
+        .clock-card { background: #11141a; border: 2px solid #2ecc71; padding: 15px; border-radius: 10px; margin: 15px 0; }
         #reloj-hora { font-size: 38px; font-weight: bold; color: #2ecc71; letter-spacing: 2px; }
         #reloj-fecha { font-size: 20px; color: #b0b9c6; text-transform: capitalize; margin-top: 5px; }
 
-        .card { 
-            background: #282d3b; 
-            padding: 25px; 
-            border-radius: 10px; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-            border: 1px solid #3a4153;
-        }
-
+        .card { background: #282d3b; padding: 25px; border-radius: 10px; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid #3a4153; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #b0b9c6; }
         input, select { padding: 12px; margin-top: 6px; width: 100%; box-sizing: border-box; background: #1e222d; color: #fff; border: 2px solid #4a536b; border-radius: 6px; font-size: 16px; }
         input:focus, select:focus { border-color: #2ecc71; outline: none; }
@@ -99,6 +33,7 @@
         .btn-submit:hover { background: #219150; }
         .btn-vender { background: #e67e22; }
         .btn-vender:hover { background: #d35400; }
+        .btn-deposito { background: #e74c3c; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 14px; font-weight: bold; }
 
         table { width: 100%; border-collapse: collapse; background: #282d3b; border-radius: 8px; overflow: hidden; font-size: 17px; }
         th, td { padding: 14px; border-bottom: 1px solid #3a4153; text-align: left; }
@@ -108,6 +43,11 @@
         .badge { background: #27ae60; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
         .stock-ok { color: #2ecc71; font-weight: bold; }
         .stock-low { color: #e74c3c; font-weight: bold; }
+        .warning-60d { background: #d35400; color: white; padding: 3px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        
+        .metrics-grid { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
+        .metric-card { background: #11141a; border: 1px solid #2ecc71; padding: 20px; border-radius: 8px; flex: 1; min-width: 200px; text-align: center; }
+        .metric-value { font-size: 32px; font-weight: bold; color: #2ecc71; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -123,51 +63,44 @@
 
     <div class="navbar">
         <button class="nav-btn active" onclick="openTab('inicio')">🏠 Inicio</button>
-        <button class="nav-btn" onclick="openTab('inventario')">📦 Ver Inventario</button>
+        <button class="nav-btn" onclick="openTab('inventario')">📦 Mostrador</button>
+        <button class="nav-btn" onclick="openTab('deposito')">🏚️ Depósito 60D</button>
+        <button class="nav-btn" onclick="openTab('metricas')">📊 Métricas y Compras</button>
         <button class="nav-btn" onclick="openTab('cargar')">➕ Cargar Producto</button>
         <button class="nav-btn" onclick="openTab('venta')">🛒 Registrar Venta</button>
     </div>
 
-    <!-- PESTAÑA 0: INICIO CON CALENDARIO Y RELOJ SINCRO -->
+    <!-- INICIO -->
     <div id="inicio" class="tab-content active">
         <div class="welcome-card">
             <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Oleos Minerales SRL" class="main-logo-img">
-            
-            <!-- RELOJ EN VIVO -->
             <div class="clock-card">
                 <div id="reloj-hora">00:00:00</div>
                 <div id="reloj-fecha">Cargando fecha...</div>
             </div>
-
-            <p style="color: #b0b9c6; margin-top: 15px;">Sistema de Control de Stock - Seleccione una opción del menú.</p>
-            <button class="btn-submit" onclick="openTab('inventario')" style="margin-top: 10px;">Ir al Inventario</button>
+            <p style="color: #b0b9c6;">Sistema de Control de Stock - Seleccione una opción del menú.</p>
+            <button class="btn-submit" onclick="openTab('inventario')">Ir al Mostrador</button>
         </div>
     </div>
 
-    <!-- PESTAÑA 1: INVENTARIO -->
+    <!-- MOSTRADOR / INVENTARIO -->
     <div id="inventario" class="tab-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2>📦 Productos en Stock</h2>
-            <a href="/exportar" class="btn-submit" style="text-decoration: none; padding: 10px 20px; width: auto; background: #27ae60;">📥 Descargar Inventario (Excel)</a>
-        </div>
-
-        <div class="card" style="max-width: 100%; margin-bottom: 20px; padding: 15px;">
-            <h4 style="margin: 0 0 10px 0; color: #3498db;">📊 Cargar Listado Masivo (Excel)</h4>
-            <form action="/importar" method="POST" enctype="multipart/form-data" style="display: flex; gap: 15px; align-items: center;">
-                <input type="file" name="file" accept=".xlsx, .xls" required style="margin: 0;">
-                <button type="submit" class="btn-submit" style="margin: 0; width: 200px; padding: 10px; font-size: 16px;">Subir Planilla</button>
-            </form>
+            <h2>📦 Productos en Mostrador</h2>
+            <a href="/exportar" class="btn-submit" style="text-decoration: none; padding: 10px 20px; width: auto;">📥 Descargar Excel</a>
         </div>
 
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Marca / Producto</th>
+                    <th>Producto</th>
                     <th>Viscosidad</th>
-                    <th>Presentación</th>
+                    <th>Envase</th>
                     <th>Precio Venta</th>
-                    <th>Stock Actual</th>
+                    <th>Stock</th>
+                    <th>Estado / Alertas</th>
+                    <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
@@ -185,13 +118,101 @@
                             <span class="stock-ok">{{ p[5] }} unid.</span>
                         {% endif %}
                     </td>
+                    <td>
+                        {% if p[6] and p[6] < hace_60_dias %}
+                            <span class="warning-60d">⏱️ +60 Días Sin Venta</span>
+                        {% else %}
+                            <span style="color: #2ecc71;">✅ Activo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p[6] and p[6] < hace_60_dias %}
+                            <a href="/mover_deposito/{{ p[0] }}" class="btn-deposito">Mover a Depósito</a>
+                        {% else %}
+                            <span style="color: #7f8c8d; font-size: 14px;">--</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- PESTAÑA 2: CARGAR PRODUCTO -->
+    <!-- DEPÓSITO DE NO VENDIDOS (60 DÍAS) -->
+    <div id="deposito" class="tab-content">
+        <h2>🏚️ Depósito de Inactivos (+60 Días Sin Ventas)</h2>
+        <p style="color: #b0b9c6;">Productos apartados del mostrador para liquidaciones, ofertas especiales o devoluciones.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Viscosidad</th>
+                    <th>Envase</th>
+                    <th>Precio Venta</th>
+                    <th>Stock</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos_deposito %}
+                <tr>
+                    <td><b>#{{ p[0] }}</b></td>
+                    <td><span class="badge" style="background: #e67e22;">{{ p[1] }}</span></td>
+                    <td>{{ p[2] }}</td>
+                    <td>{{ p[3] }}</td>
+                    <td><b>${{ "%.2f"|format(p[4]) }}</b></td>
+                    <td>{{ p[5] }} unid.</td>
+                    <td>
+                        <a href="/mover_mostrador/{{ p[0] }}" class="btn-submit" style="padding: 6px 12px; font-size: 14px; text-decoration: none;">Devolver a Mostrador</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #b0b9c6;">No hay productos archivados en el depósito.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MÉTRICAS Y COMPRAS -->
+    <div id="metricas" class="tab-content">
+        <h2>📊 Inteligencia de Ventas y Decisiones de Compra</h2>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>🛢️ Total Litros Vendidos</h3>
+                <div class="metric-value">{{ "%.1f"|format(total_litros) }} Lts</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div class="card" style="flex: 1;">
+                <h3>🏆 Top Marcas Más Vendidas (Volumen)</h3>
+                <ul>
+                    {% for m in top_marcas %}
+                        <li style="font-size: 20px; margin-bottom: 10px;"><b>{{ m[0] }}:</b> {{ "%.1f"|format(m[1]) }} Litros</li>
+                    {% else %}
+                        <li>No hay ventas registradas aún.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="card" style="flex: 1;">
+                <h3>⚙️ Viscosidades Más Demandadas</h3>
+                <ul>
+                    {% for v in top_viscosidades %}
+                        <li style="font-size: 20px; margin-bottom: 10px;"><b>{{ v[0] }}:</b> {{ "%.1f"|format(v[1]) }} Litros</li>
+                    {% else %}
+                        <li>No hay ventas registradas aún.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARGAR PRODUCTO -->
     <div id="cargar" class="tab-content">
         <div class="card">
             <h2>➕ Cargar Nuevo Lubricante</h2>
@@ -248,7 +269,7 @@
         </div>
     </div>
 
-    <!-- PESTAÑA 3: REGISTRAR VENTA -->
+    <!-- REGISTRAR VENTA -->
     <div id="venta" class="tab-content">
         <div class="card" style="max-width: 500px;">
             <h2>🛒 Registrar Venta Rápida</h2>
@@ -264,26 +285,20 @@
         </div>
     </div>
 
-    <!-- SCRIPT JAVASCRIPT: RELOJ TIEMPO REAL Y PESTAÑAS -->
     <script>
         function actualizarReloj() {
             const ahora = new Date();
-            
-            // Formato de hora: HH:MM:SS
             const horas = String(ahora.getHours()).padStart(2, '0');
             const minutos = String(ahora.getMinutes()).padStart(2, '0');
             const segundos = String(ahora.getSeconds()).padStart(2, '0');
             document.getElementById('reloj-hora').textContent = `${horas}:${minutos}:${segundos}`;
 
-            // Formato de fecha completo en español
             const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const fechaTexto = ahora.toLocaleDateString('es-ES', opcionesFecha);
-            document.getElementById('reloj-fecha').textContent = fechaTexto;
+            document.getElementById('reloj-fecha').textContent = ahora.toLocaleDateString('es-ES', opcionesFecha);
         }
 
-        // Actualiza el reloj cada 1 segundo (1000 ms)
         setInterval(actualizarReloj, 1000);
-        actualizarReloj(); // Ejecutar inmediatamente al cargar
+        actualizarReloj();
 
         function openTab(tabName) {
             let contents = document.getElementsByClassName("tab-content");
