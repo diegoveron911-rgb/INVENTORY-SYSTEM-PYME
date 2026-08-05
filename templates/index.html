@@ -2,33 +2,235 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Lubricentro - Control de Inventario</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLEOS MINERALES SRL - Sistema de Gestión</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f4f6f9; color: #333; }
-        h1 { color: #1a252f; margin-bottom: 20px; }
-        .grid-container { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
-        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
-        .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 8px; }
-        label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
-        input, select, button { padding: 9px; margin-top: 4px; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #27ae60; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; }
-        button:hover { background: #219150; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #1e222d; 
+            color: #e1e6ed; 
+            font-size: 18px; 
+        }
+
+        /* HEADER PRINCIPAL */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #282d3b;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #3a4153;
+        }
+
+        .header-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: #2ecc71; /* Verde alineado al logo */
+            margin: 0;
+        }
+
+        .logos-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-img {
+            height: 40px;
+            object-fit: contain;
+            background: #ffffff;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* NAVEGACIÓN Y PESTAÑAS */
+        .navbar { 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            margin-bottom: 25px; 
+            background: #282d3b; 
+            padding: 10px; 
+            border-radius: 8px;
+        }
+
+        .nav-btn { 
+            background: #3a4153; 
+            color: #fff; 
+            border: 2px solid #4a536b; 
+            padding: 12px 24px; 
+            border-radius: 6px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+
+        .nav-btn:hover, .nav-btn.active { 
+            background: #2ecc71; 
+            border-color: #27ae60; 
+            color: #111;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* PANTALLA DE INICIO CON LOGO GRANDE */
+        .welcome-card {
+            background: #282d3b;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 650px;
+            margin: 20px auto;
+            border: 1px solid #3a4153;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+        }
+
+        .main-logo-img {
+            width: 100%;
+            max-width: 420px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        /* FORMULARIOS Y TARJETAS */
+        .card { 
+            background: #282d3b; 
+            padding: 25px; 
+            border-radius: 10px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+            border: 1px solid #3a4153;
+        }
+
+        label { display: block; margin-top: 15px; font-weight: bold; color: #b0b9c6; }
+        
+        input, select { 
+            padding: 12px; 
+            margin-top: 6px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            background: #1e222d; 
+            color: #fff; 
+            border: 2px solid #4a536b; 
+            border-radius: 6px; 
+            font-size: 16px; 
+        }
+
+        input:focus, select:focus { border-color: #2ecc71; outline: none; }
+
+        .btn-submit { 
+            background: #27ae60; 
+            color: white; 
+            border: none; 
+            font-size: 20px; 
+            font-weight: bold; 
+            padding: 15px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-top: 20px; 
+        }
+
+        .btn-submit:hover { background: #219150; }
         .btn-vender { background: #e67e22; }
         .btn-vender:hover { background: #d35400; }
-        table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        th { background: #2c3e50; color: white; }
-        tr:hover { background-color: #f1f1f1; }
-        .badge { background: #3498db; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.85em; }
+
+        /* TABLA MODO OSCURO */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: #282d3b; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            font-size: 17px;
+        }
+
+        th, td { padding: 14px; border-bottom: 1px solid #3a4153; text-align: left; }
+        th { background: #11141a; color: #2ecc71; font-size: 18px; }
+        tr:hover { background-color: #32384a; }
+
+        .badge { background: #27ae60; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+        .stock-ok { color: #2ecc71; font-weight: bold; }
+        .stock-low { color: #e74c3c; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>🛢️ Control de Inventario - Lubricentro</h1>
 
-    <div class="grid-container">
-        <!-- FORMULARIO 1: CARGA DE LUBRICANTES POR MARCA -->
+    <!-- CABECERA PRINCIPAL -->
+    <div class="header-container">
+        <h1 class="header-title">🛢️ OLEOS MINERALES SRL</h1>
+        <div class="logos-group">
+            <img src="{{ url_for('static', filename='ama.png') }}" alt="AMA" class="logo-img">
+            <img src="{{ url_for('static', filename='gulf.png') }}" alt="Gulf" class="logo-img">
+            <img src="{{ url_for('static', filename='eni.png') }}" alt="Eni" class="logo-img">
+        </div>
+    </div>
+
+    <!-- MENÚ / PESTAÑAS -->
+    <div class="navbar">
+        <button class="nav-btn active" onclick="openTab('inicio')">🏠 Inicio</button>
+        <button class="nav-btn" onclick="openTab('inventario')">📦 Ver Inventario</button>
+        <button class="nav-btn" onclick="openTab('cargar')">➕ Cargar Producto</button>
+        <button class="nav-btn" onclick="openTab('venta')">🛒 Registrar Venta</button>
+    </div>
+
+    <!-- PESTAÑA 0: INICIALIZACIÓN / BIENVENIDA CON LOGO GRANDE -->
+    <div id="inicio" class="tab-content active">
+        <div class="welcome-card">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Oleos Minerales SRL" class="main-logo-img">
+            <h2 style="color: #fff; margin-top: 10px;">Sistema de Control de Stock y Ventas</h2>
+            <p style="color: #b0b9c6;">Seleccione una opción del menú superior para comenzar.</p>
+            <button class="btn-submit" onclick="openTab('inventario')" style="margin-top: 15px;">Ir al Inventario</button>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 1: INVENTARIO COMPLETO (Solo visible al presionar "Ver Inventario") -->
+    <div id="inventario" class="tab-content">
+        <h2>📦 Productos en Stock</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Marca / Producto</th>
+                    <th>Viscosidad</th>
+                    <th>Presentación</th>
+                    <th>Precio Venta</th>
+                    <th>Stock Actual</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in productos %}
+                <tr>
+                    <td><b>#{{ p[0] }}</b></td>
+                    <td><span class="badge">{{ p[1] }}</span></td>
+                    <td>{{ p[2] }}</td>
+                    <td>{{ p[3] }}</td>
+                    <td><b>${{ "%.2f"|format(p[4]) }}</b></td>
+                    <td>
+                        {% if p[5] <= 3 %}
+                            <span class="stock-low">⚠️ {{ p[5] }} unid.</span>
+                        {% else %}
+                            <span class="stock-ok">{{ p[5] }} unid.</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PESTAÑA 2: CARGAR PRODUCTO -->
+    <div id="cargar" class="tab-content">
         <div class="card">
-            <h3>➕ Cargar Nuevo Lubricante</h3>
+            <h2>➕ Cargar Nuevo Lubricante</h2>
             <form action="/agregar" method="POST">
                 <label>Marca:</label>
                 <select name="marca" required>
@@ -55,78 +257,65 @@
                 <label>Código de Barras (Opcional):</label>
                 <input type="text" name="codigo_barras" placeholder="Escanear o tipear código">
 
-                <div style="display: flex; gap: 10px;">
-                    <div>
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
                         <label>Precio Costo ($):</label>
                         <input type="number" step="0.01" name="precio_costo" required>
                     </div>
-                    <div>
+                    <div style="flex: 1;">
                         <label>Precio Venta ($):</label>
                         <input type="number" step="0.01" name="precio_venta" required>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <div>
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
                         <label>Stock Inicial:</label>
                         <input type="number" name="stock" value="10" required>
                     </div>
-                    <div>
+                    <div style="flex: 1;">
                         <label>Stock Mínimo:</label>
                         <input type="number" name="stock_minimo" value="3" required>
                     </div>
                 </div>
 
-                <button type="submit">Guardar Producto</button>
-            </form>
-        </div>
-
-        <!-- FORMULARIO 2: VENTAS RÁPIDAS -->
-        <div class="card" style="max-width: 320px;">
-            <h3>🛒 Registrar Venta</h3>
-            <form action="/vender" method="POST">
-                <label>ID del Producto:</label>
-                <input type="number" name="id_producto" placeholder="Ej: 1" required>
-
-                <label>Cantidad Vendida:</label>
-                <input type="number" name="cantidad" value="1" min="1" required>
-
-                <button type="submit" class="btn-vender">Descontar del Stock</button>
+                <button type="submit" class="btn-submit">Guardar Producto en el Sistema</button>
             </form>
         </div>
     </div>
 
-    <!-- TABLA DE PRODUCTOS EN STOCK -->
-    <h2>📦 Inventario Actual</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Marca / Producto</th>
-                <th>Viscosidad</th>
-                <th>Presentación</th>
-                <th>P. Venta</th>
-                <th>Stock Actual</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for p in productos %}
-            <tr>
-                <td><b>#{{ p[0] }}</b></td>
-                <td><span class="badge">{{ p[1] }}</span></td>
-                <td>{{ p[2] }}</td>
-                <td>{{ p[3] }}</td>
-                <td>${{ "%.2f"|format(p[4]) }}</td>
-                <td>
-                    {% if p[5] <= 3 %}
-                        <span style="color: red; font-weight: bold;">⚠️ {{ p[5] }} unid.</span>
-                    {% else %}
-                        <span style="color: green; font-weight: bold;">{{ p[5] }} unid.</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- PESTAÑA 3: REGISTRAR VENTA -->
+    <div id="venta" class="tab-content">
+        <div class="card" style="max-width: 500px;">
+            <h2>🛒 Registrar Venta Rápida</h2>
+            <form action="/vender" method="POST">
+                <label>ID del Producto:</label>
+                <input type="number" name="id_producto" placeholder="Ingrese el N° de ID del producto" required>
+
+                <label>Cantidad Vendida:</label>
+                <input type="number" name="cantidad" value="1" min="1" required>
+
+                <button type="submit" class="btn-submit btn-vender">Descontar del Stock</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openTab(tabName) {
+            let contents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < contents.length; i++) {
+                contents[i].classList.remove("active");
+            }
+            let buttons = document.getElementsByClassName("nav-btn");
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove("active");
+            }
+            document.getElementById(tabName).classList.add("active");
+            
+            // Buscar el botón correspondiente para marcarlo activo
+            let activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(tabName));
+            if (activeBtn) activeBtn.classList.add("active");
+        }
+    </script>
 </body>
 </html>
