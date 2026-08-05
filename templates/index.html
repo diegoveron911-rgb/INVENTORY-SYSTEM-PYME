@@ -27,27 +27,23 @@
         .card { background: #282d3b; padding: 25px; border-radius: 10px; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid #3a4153; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #b0b9c6; }
         input, select { padding: 12px; margin-top: 6px; width: 100%; box-sizing: border-box; background: #1e222d; color: #fff; border: 2px solid #4a536b; border-radius: 6px; font-size: 16px; }
-        input:focus, select:focus { border-color: #2ecc71; outline: none; }
+        
+        .search-box { background: #11141a; border: 2px solid #2ecc71; padding: 15px; font-size: 20px; border-radius: 8px; margin-bottom: 20px; color: #2ecc71; font-weight: bold; }
 
         .btn-submit { background: #27ae60; color: white; border: none; font-size: 20px; font-weight: bold; padding: 15px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 20px; }
-        .btn-submit:hover { background: #219150; }
         .btn-vender { background: #e67e22; }
-        .btn-vender:hover { background: #d35400; }
-        .btn-deposito { background: #e74c3c; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 14px; font-weight: bold; }
 
         table { width: 100%; border-collapse: collapse; background: #282d3b; border-radius: 8px; overflow: hidden; font-size: 17px; }
-        th, td { padding: 14px; border-bottom: 1px solid #3a4153; text-align: left; }
+        th, td { padding: 12px; border-bottom: 1px solid #3a4153; text-align: left; }
         th { background: #11141a; color: #2ecc71; font-size: 18px; }
         tr:hover { background-color: #32384a; }
 
         .badge { background: #27ae60; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+        .bulto-tag { background: #3498db; color: white; padding: 3px 8px; border-radius: 4px; font-size: 14px; font-weight: bold; }
         .stock-ok { color: #2ecc71; font-weight: bold; }
         .stock-low { color: #e74c3c; font-weight: bold; }
-        .warning-60d { background: #d35400; color: white; padding: 3px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; }
-        
-        .metrics-grid { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
-        .metric-card { background: #11141a; border: 1px solid #2ecc71; padding: 20px; border-radius: 8px; flex: 1; min-width: 200px; text-align: center; }
-        .metric-value { font-size: 32px; font-weight: bold; color: #2ecc71; margin-top: 10px; }
+        .btn-approve { background: #27ae60; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; }
+        .btn-reject { background: #e74c3c; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -57,17 +53,17 @@
         <div class="logos-group">
             <img src="{{ url_for('static', filename='ama.png') }}" alt="AMA" class="logo-img">
             <img src="{{ url_for('static', filename='gulf.png') }}" alt="Gulf" class="logo-img">
-            <img src="{{ url_for('static', filename='eni.png') }}" alt="Eni" class="logo-img">
         </div>
     </div>
 
     <div class="navbar">
         <button class="nav-btn active" onclick="openTab('inicio')">🏠 Inicio</button>
         <button class="nav-btn" onclick="openTab('inventario')">📦 Mostrador</button>
+        <button class="nav-btn" onclick="openTab('reservas')">📱 Reservas ({{ reservas_pendientes|length }})</button>
         <button class="nav-btn" onclick="openTab('deposito')">🏚️ Depósito 60D</button>
-        <button class="nav-btn" onclick="openTab('metricas')">📊 Métricas y Compras</button>
-        <button class="nav-btn" onclick="openTab('cargar')">➕ Cargar Producto</button>
-        <button class="nav-btn" onclick="openTab('venta')">🛒 Registrar Venta</button>
+        <button class="nav-btn" onclick="openTab('metricas')">📊 Métricas</button>
+        <button class="nav-btn" onclick="openTab('cargar')">➕ Cargar</button>
+        <button class="nav-btn" onclick="openTab('venta')">🛒 Venta Directa</button>
     </div>
 
     <!-- INICIO -->
@@ -78,59 +74,55 @@
                 <div id="reloj-hora">00:00:00</div>
                 <div id="reloj-fecha">Cargando fecha...</div>
             </div>
-            <p style="color: #b0b9c6;">Sistema de Control de Stock - Seleccione una opción del menú.</p>
             <button class="btn-submit" onclick="openTab('inventario')">Ir al Mostrador</button>
         </div>
     </div>
 
-    <!-- MOSTRADOR / INVENTARIO -->
+    <!-- MOSTRADOR CON BUSCADOR EN TIEMPO REAL -->
     <div id="inventario" class="tab-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h2>📦 Productos en Mostrador</h2>
             <a href="/exportar" class="btn-submit" style="text-decoration: none; padding: 10px 20px; width: auto;">📥 Descargar Excel</a>
         </div>
 
-        <table>
+        <!-- BUSCADOR DINÁMICO -->
+        <input type="text" id="buscador" class="search-box" onkeyup="filtrarTabla()" placeholder="🔍 Buscar por Producto, Código, Marca o Viscosidad (Ej: 5W-30, AMA, Full Synthetic)...">
+
+        <table id="tabla-productos">
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Código</th>
                     <th>Producto</th>
                     <th>Viscosidad</th>
-                    <th>Envase</th>
-                    <th>Precio Venta</th>
-                    <th>Stock</th>
-                    <th>Estado / Alertas</th>
-                    <th>Acción</th>
+                    <th>Bulto Cerrado</th>
+                    <th>P. Venta</th>
+                    <th>Stock Actual</th>
+                    <th>Ajustar Stock</th>
                 </tr>
             </thead>
             <tbody>
                 {% for p in productos %}
                 <tr>
                     <td><b>#{{ p[0] }}</b></td>
-                    <td><span class="badge">{{ p[1] }}</span></td>
-                    <td>{{ p[2] }}</td>
-                    <td>{{ p[3] }}</td>
-                    <td><b>${{ "%.2f"|format(p[4]) }}</b></td>
+                    <td><code>{{ p[1] }}</code></td>
+                    <td><span class="badge">{{ p[2] }}</span></td>
+                    <td><b>{{ p[3] }}</b></td>
+                    <td><span class="bulto-tag">x{{ p[5] }} unid.</span> ({{ p[4] }})</td>
+                    <td><b>${{ "%.2f"|format(p[6]) }}</b></td>
                     <td>
-                        {% if p[5] <= 3 %}
-                            <span class="stock-low">⚠️ {{ p[5] }} unid.</span>
+                        {% if p[7] <= 3 %}
+                            <span class="stock-low">⚠️ {{ p[7] }} unid.</span>
                         {% else %}
-                            <span class="stock-ok">{{ p[5] }} unid.</span>
+                            <span class="stock-ok">{{ p[7] }} unid.</span>
                         {% endif %}
                     </td>
                     <td>
-                        {% if p[6] and p[6] < hace_60_dias %}
-                            <span class="warning-60d">⏱️ +60 Días Sin Venta</span>
-                        {% else %}
-                            <span style="color: #2ecc71;">✅ Activo</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if p[6] and p[6] < hace_60_dias %}
-                            <a href="/mover_deposito/{{ p[0] }}" class="btn-deposito">Mover a Depósito</a>
-                        {% else %}
-                            <span style="color: #7f8c8d; font-size: 14px;">--</span>
-                        {% endif %}
+                        <form action="/editar_stock" method="POST" style="display: flex; gap: 5px;">
+                            <input type="hidden" name="id_producto" value="{{ p[0] }}">
+                            <input type="number" name="nuevo_stock" value="{{ p[7] }}" style="width: 80px; padding: 5px; margin: 0;">
+                            <button type="submit" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">💾 Ok</button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}
@@ -138,18 +130,77 @@
         </table>
     </div>
 
-    <!-- DEPÓSITO DE NO VENDIDOS (60 DÍAS) -->
+    <!-- RESERVAS REMOTAS (VENDEDORES EN RUTA Y OPERARIOS) -->
+    <div id="reservas" class="tab-content">
+        <h2>📱 Solicitudes de Reserva de Stock (Vendedores Remotos)</h2>
+        
+        <div class="card" style="margin-bottom: 25px;">
+            <h3>📝 Nueva Solicitud de Reserva (Desde Celular/Ruta)</h3>
+            <form action="/crear_reserva" method="POST">
+                <label>Nombre del Vendedor / Operario:</label>
+                <input type="text" name="vendedor" placeholder="Ej: Juan Pérez" required>
+
+                <label>ID del Producto a Reservar:</label>
+                <input type="number" name="id_producto" placeholder="Ingrese el N° de ID del producto" required>
+
+                <label>Cantidad de Unidades a Reservar:</label>
+                <input type="number" name="cantidad" value="1" min="1" required>
+
+                <button type="submit" class="btn-submit" style="background: #3498db;">Enviar Solicitud de Reserva</button>
+            </form>
+        </div>
+
+        <h3>⏳ Reservas Pendientes de Aprobación en Mostrador</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Reserva</th>
+                    <th>Vendedor</th>
+                    <th>Producto</th>
+                    <th>Cantidad Solicitada</th>
+                    <th>Stock en Mostrador</th>
+                    <th>Fecha</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reservas_pendientes %}
+                <tr>
+                    <td><b>#{{ r[0] }}</b></td>
+                    <td><b>{{ r[4] }}</b></td>
+                    <td><span class="badge">{{ r[1] }}</span> ({{ r[2] }})</td>
+                    <td><b>{{ r[5] }} unid.</b></td>
+                    <td>
+                        {% if r[8] >= r[5] %}
+                            <span class="stock-ok">✅ {{ r[8] }} Disponibles</span>
+                        {% else %}
+                            <span class="stock-low">❌ Solo {{ r[8] }} en Stock</span>
+                        {% endif %}
+                    </td>
+                    <td><small>{{ r[7] }}</small></td>
+                    <td>
+                        {% if r[8] >= r[5] %}
+                            <a href="/aprobar_reserva/{{ r[0] }}" class="btn-approve">Aprobar y Descontar</a>
+                        {% endif %}
+                        <a href="/rechazar_reserva/{{ r[0] }}" class="btn-reject">Rechazar</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" style="text-align: center; color: #b0b9c6;">No hay reservas pendientes en este momento.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DEPÓSITO 60D -->
     <div id="deposito" class="tab-content">
         <h2>🏚️ Depósito de Inactivos (+60 Días Sin Ventas)</h2>
-        <p style="color: #b0b9c6;">Productos apartados del mostrador para liquidaciones, ofertas especiales o devoluciones.</p>
         <table>
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Producto</th>
-                    <th>Viscosidad</th>
-                    <th>Envase</th>
-                    <th>Precio Venta</th>
+                    <th>Bulto</th>
                     <th>Stock</th>
                     <th>Acción</th>
                 </tr>
@@ -158,57 +209,24 @@
                 {% for p in productos_deposito %}
                 <tr>
                     <td><b>#{{ p[0] }}</b></td>
-                    <td><span class="badge" style="background: #e67e22;">{{ p[1] }}</span></td>
-                    <td>{{ p[2] }}</td>
-                    <td>{{ p[3] }}</td>
-                    <td><b>${{ "%.2f"|format(p[4]) }}</b></td>
-                    <td>{{ p[5] }} unid.</td>
-                    <td>
-                        <a href="/mover_mostrador/{{ p[0] }}" class="btn-submit" style="padding: 6px 12px; font-size: 14px; text-decoration: none;">Devolver a Mostrador</a>
-                    </td>
+                    <td>{{ p[1] }}</td>
+                    <td>x{{ p[4] }} unid.</td>
+                    <td>{{ p[6] }} unid.</td>
+                    <td><a href="/mover_mostrador/{{ p[0] }}" class="btn-submit" style="padding: 6px 12px; font-size: 14px; text-decoration: none;">Devolver a Mostrador</a></td>
                 </tr>
                 {% else %}
-                <tr>
-                    <td colspan="7" style="text-align: center; color: #b0b9c6;">No hay productos archivados en el depósito.</td>
-                </tr>
+                <tr><td colspan="5" style="text-align: center; color: #b0b9c6;">No hay productos archivados.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- MÉTRICAS Y COMPRAS -->
+    <!-- MÉTRICAS -->
     <div id="metricas" class="tab-content">
-        <h2>📊 Inteligencia de Ventas y Decisiones de Compra</h2>
-        
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <h3>🛢️ Total Litros Vendidos</h3>
-                <div class="metric-value">{{ "%.1f"|format(total_litros) }} Lts</div>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <div class="card" style="flex: 1;">
-                <h3>🏆 Top Marcas Más Vendidas (Volumen)</h3>
-                <ul>
-                    {% for m in top_marcas %}
-                        <li style="font-size: 20px; margin-bottom: 10px;"><b>{{ m[0] }}:</b> {{ "%.1f"|format(m[1]) }} Litros</li>
-                    {% else %}
-                        <li>No hay ventas registradas aún.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <div class="card" style="flex: 1;">
-                <h3>⚙️ Viscosidades Más Demandadas</h3>
-                <ul>
-                    {% for v in top_viscosidades %}
-                        <li style="font-size: 20px; margin-bottom: 10px;"><b>{{ v[0] }}:</b> {{ "%.1f"|format(v[1]) }} Litros</li>
-                    {% else %}
-                        <li>No hay ventas registradas aún.</li>
-                    {% endfor %}
-                </ul>
-            </div>
+        <h2>📊 Inteligencia de Ventas</h2>
+        <div class="card">
+            <h3>🛢️ Total Litros Vendidos</h3>
+            <p style="font-size: 32px; font-weight: bold; color: #2ecc71;">{{ "%.1f"|format(total_litros) }} Lts</p>
         </div>
     </div>
 
@@ -221,26 +239,20 @@
                 <select name="marca" required>
                     <option value="AMA">AMA Lubricants</option>
                     <option value="GULF">GULF</option>
-                    <option value="ENI">ENI / Agip</option>
                     <option value="OTRA">Otra Marca</option>
                 </select>
 
                 <label>Nombre / Línea de Producto:</label>
-                <input type="text" name="nombre" placeholder="Ej: Full Synthetic / GP Line / Formula L" required>
+                <input type="text" name="nombre" required>
 
                 <label>Viscosidad:</label>
-                <input type="text" name="viscosidad" placeholder="Ej: 5W-30, 10W-40, 20W-50" required>
+                <input type="text" name="viscosidad" required>
 
                 <label>Presentación / Envase:</label>
-                <select name="presentacion" required>
-                    <option value="1L">Empaque 1 Litro</option>
-                    <option value="4L">Empaque 4 Litros</option>
-                    <option value="Balde 20L">Balde 20 Litros</option>
-                    <option value="Tambor 208L">Tambor 208 Litros</option>
-                </select>
+                <input type="text" name="presentacion" required>
 
-                <label>Código de Barras (Opcional):</label>
-                <input type="text" name="codigo_barras" placeholder="Escanear o tipear código">
+                <label>Unidades por Bulto Cerrado:</label>
+                <input type="number" name="bulto" value="12" required>
 
                 <div style="display: flex; gap: 15px;">
                     <div style="flex: 1;">
@@ -253,29 +265,21 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 15px;">
-                    <div style="flex: 1;">
-                        <label>Stock Inicial:</label>
-                        <input type="number" name="stock" value="10" required>
-                    </div>
-                    <div style="flex: 1;">
-                        <label>Stock Mínimo:</label>
-                        <input type="number" name="stock_minimo" value="3" required>
-                    </div>
-                </div>
+                <label>Stock Inicial (Unidades):</label>
+                <input type="number" name="stock" value="12" required>
 
-                <button type="submit" class="btn-submit">Guardar Producto en el Sistema</button>
+                <button type="submit" class="btn-submit">Guardar Producto</button>
             </form>
         </div>
     </div>
 
-    <!-- REGISTRAR VENTA -->
+    <!-- REGISTRAR VENTA DIRECTA -->
     <div id="venta" class="tab-content">
         <div class="card" style="max-width: 500px;">
             <h2>🛒 Registrar Venta Rápida</h2>
             <form action="/vender" method="POST">
                 <label>ID del Producto:</label>
-                <input type="number" name="id_producto" placeholder="Ingrese el N° de ID del producto" required>
+                <input type="number" name="id_producto" required>
 
                 <label>Cantidad Vendida:</label>
                 <input type="number" name="cantidad" value="1" min="1" required>
@@ -286,31 +290,37 @@
     </div>
 
     <script>
-        function actualizarReloj() {
-            const ahora = new Date();
-            const horas = String(ahora.getHours()).padStart(2, '0');
-            const minutos = String(ahora.getMinutes()).padStart(2, '0');
-            const segundos = String(ahora.getSeconds()).padStart(2, '0');
-            document.getElementById('reloj-hora').textContent = `${horas}:${minutos}:${segundos}`;
+        // BUSCADOR EN TIEMPO REAL
+        function filtrarTabla() {
+            let input = document.getElementById("buscador");
+            let filter = input.value.toUpperCase();
+            let table = document.getElementById("tabla-productos");
+            let tr = table.getElementsByTagName("tr");
 
-            const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('reloj-fecha').textContent = ahora.toLocaleDateString('es-ES', opcionesFecha);
+            for (let i = 1; i < tr.length; i++) {
+                let textoFila = tr[i].textContent || tr[i].innerText;
+                if (textoFila.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
         }
 
+        function actualizarReloj() {
+            const ahora = new Date();
+            document.getElementById('reloj-hora').textContent = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}:${String(ahora.getSeconds()).padStart(2, '0')}`;
+            document.getElementById('reloj-fecha').textContent = ahora.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
         function openTab(tabName) {
             let contents = document.getElementsByClassName("tab-content");
-            for (let i = 0; i < contents.length; i++) {
-                contents[i].classList.remove("active");
-            }
+            for (let i = 0; i < contents.length; i++) contents[i].classList.remove("active");
             let buttons = document.getElementsByClassName("nav-btn");
-            for (let i = 0; i < buttons.length; i++) {
-                buttons[i].classList.remove("active");
-            }
+            for (let i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
             document.getElementById(tabName).classList.add("active");
-            
             let activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(tabName));
             if (activeBtn) activeBtn.classList.add("active");
         }

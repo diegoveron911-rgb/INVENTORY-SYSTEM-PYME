@@ -10,19 +10,6 @@ app = Flask(__name__)
 def conectar():
     return sqlite3.connect('inventario.db')
 
-# Función auxiliar para calcular litros según presentación
-def obtener_litros(presentacion):
-    p = presentacion.upper()
-    if '208L' in p or 'TAMBOR' in p:
-        return 208.0
-    elif '20L' in p or 'BALDE' in p:
-        return 20.0
-    elif '4L' in p:
-        return 4.0
-    elif '1L' in p:
-        return 1.0
-    return 1.0
-
 @app.route('/')
 def index():
     conn = conectar()
@@ -30,29 +17,36 @@ def index():
     
     # Cargar productos activos del mostrador
     cursor.execute('''
-        SELECT id, nombre, viscosidad, presentacion, precio_venta, stock_actual, ultima_venta, litros_unitarios 
+        SELECT id, codigo_barras, nombre, viscosidad, presentacion, bulto_unidades, precio_venta, stock_actual, ultima_venta 
         FROM productos 
         WHERE ubicacion = 'MOSTRADOR'
     ''')
     productos = cursor.fetchall()
 
-    # Cargar productos reubicados en el Depósito 60D
+    # Cargar productos del Depósito 60D
     cursor.execute('''
-        SELECT id, nombre, viscosidad, presentacion, precio_venta, stock_actual, ultima_venta 
+        SELECT id, nombre, viscosidad, presentacion, bulto_unidades, precio_venta, stock_actual, ultima_venta 
         FROM productos 
         WHERE ubicacion = 'DEPOSITO_60D'
     ''')
     productos_deposito = cursor.fetchall()
 
-    # Cálculo para la alerta de 60 días sin ventas
+    # Cargar reservas pendientes para el mostrador
+    cursor.execute('''
+        SELECT r.id, p.nombre, p.viscosidad, p.presentacion, r.empleado_nombre, r.cantidad, r.estado, r.fecha, p.stock_actual
+        FROM reservas r
+        JOIN productos p ON r.producto_id = p.id
+        WHERE r.estado = 'PENDIENTE'
+        ORDER BY r.fecha DESC
+    ''')
+    reservas_pendientes = cursor.fetchall()
+
     hace_60_dias = (datetime.now() - timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S')
 
-    # METRICAS PARA EL PANEL DE CONTROL
-    # 1. Total Litros Vendidos
+    # Métricas de consumo
     cursor.execute("SELECT SUM(litros_totales) FROM historial_ventas")
     total_litros = cursor.fetchone()[0] or 0.0
 
-    # 2. Top Marcas vendidas
     cursor.execute('''
         SELECT marca, SUM(litros_totales) as litros 
         FROM historial_ventas 
@@ -62,7 +56,6 @@ def index():
     ''')
     top_marcas = cursor.fetchall()
 
-    # 3. Top Viscosidades vendidas
     cursor.execute('''
         SELECT viscosidad, SUM(litros_totales) as litros 
         FROM historial_ventas 
@@ -78,11 +71,96 @@ def index():
         'index.html', 
         productos=productos, 
         productos_deposito=productos_deposito,
+        reservas_pendientes=reservas_pendientes,
         hace_60_dias=hace_60_dias,
         total_litros=total_litros,
         top_marcas=top_marcas,
         top_viscosidades=top_viscosidades
     )
+
+# --- SISTEMA DE RESERVAS REMOTAS ---
+
+@app.route('/crear_reserva', methods=['POST'])
+def crear_reserva():
+    id_prod = request.form['id_producto']
+    vendedor = request.form['vendedor']
+    cantidad = int(request.form['cantidad'])
+
+    conn = conectar()
+    cursor = conn.cursor()
+    
+    # Verificar si hay stock suficiente
+    cursor.execute("SELECT stock_actual FROM productos WHERE id = ?", (id_prod,))
+    prod = cursor.fetchone()
+
+    if prod and prod[0] >= cantidad:
+        cursor.execute('''
+            INSERT INTO reservas (producto_id, empleado_nombre, cantidad, estado)
+            VALUES (?, ?, ?, 'PENDIENTE')
+        ''', (id_prod, vendedor, cantidad))
+        conn.commit()
+
+    conn.close()
+    return redirect(url_for('index'))
+
+@app.route('/aprobar_reserva/<int:id>')
+def aprobar_reserva(id):
+    conn = conectar()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT producto_id, cantidad FROM reservas WHERE id = ?", (id,))
+    res = cursor.fetchone()
+    
+    if res:
+        id_prod, cantidad = res
+        cursor.execute("SELECT nombre, viscosidad, presentacion, precio_venta, stock_actual, litros_unitarios FROM productos WHERE id = ?", (id_prod,))
+        prod = cursor.fetchone()
+        
+        if prod and prod[4] >= cantidad:
+            nombre, viscosidad, presentacion, precio_venta, stock_actual, litros_unitarios = prod
+            marca = nombre.split(' - ')[0] if ' - ' in nombre else 'OTRA'
+            nuevo_stock = stock_actual - cantidad
+            litros_vendidos = cantidad * litros_unitarios
+            precio_total = cantidad * precio_venta
+            fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Descontar stock y aprobar reserva
+            cursor.execute("UPDATE productos SET stock_actual = ?, ultima_venta = ? WHERE id = ?", (nuevo_stock, fecha_actual, id_prod))
+            cursor.execute("UPDATE reservas SET estado = 'APROBADO' WHERE id = ?", (id,))
+            
+            # Registrar historial de ventas
+            cursor.execute('''
+                INSERT INTO historial_ventas (producto_id, marca, viscosidad, presentacion, cantidad, litros_totales, precio_total, fecha)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (id_prod, marca, viscosidad, presentacion, cantidad, litros_vendidos, precio_total, fecha_actual))
+
+            conn.commit()
+
+    conn.close()
+    return redirect(url_for('index'))
+
+@app.route('/rechazar_reserva/<int:id>')
+def rechazar_reserva(id):
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE reservas SET estado = 'RECHAZADO' WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
+
+# --- EDICIÓN Y VENTAS DIRECTAS ---
+
+@app.route('/editar_stock', methods=['POST'])
+def editar_stock():
+    id_prod = request.form['id_producto']
+    nuevo_stock = int(request.form['nuevo_stock'])
+    
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE productos SET stock_actual = ? WHERE id = ?", (nuevo_stock, id_prod))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
 
 @app.route('/agregar', methods=['POST'])
 def agregar():
@@ -91,19 +169,18 @@ def agregar():
     nombre_completo = f"{marca} - {nombre_linea}"
     viscosidad = request.form['viscosidad']
     presentacion = request.form['presentacion']
-    litros = obtener_litros(presentacion)
+    bulto = int(request.form.get('bulto', 1))
     codigo_barras = request.form.get('codigo_barras', '')
     precio_costo = float(request.form['precio_costo'])
     precio_venta = float(request.form['precio_venta'])
     stock = int(request.form['stock'])
-    stock_minimo = int(request.form['stock_minimo'])
 
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO productos (codigo_barras, nombre, viscosidad, presentacion, litros_unitarios, precio_costo, precio_venta, stock_actual, stock_minimo)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (codigo_barras, nombre_completo, viscosidad, presentacion, litros, precio_costo, precio_venta, stock, stock_minimo))
+        INSERT INTO productos (codigo_barras, nombre, viscosidad, presentacion, bulto_unidades, precio_costo, precio_venta, stock_actual)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (codigo_barras, nombre_completo, viscosidad, presentacion, bulto, precio_costo, precio_venta, stock))
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
@@ -127,10 +204,7 @@ def vender():
         precio_total = cantidad * precio_venta
         fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        # Actualizar stock y fecha de última venta
         cursor.execute("UPDATE productos SET stock_actual = ?, ultima_venta = ? WHERE id = ?", (nuevo_stock, fecha_actual, id_prod))
-        
-        # Registrar en el historial para métricas
         cursor.execute('''
             INSERT INTO historial_ventas (producto_id, marca, viscosidad, presentacion, cantidad, litros_totales, precio_total, fecha)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -141,7 +215,6 @@ def vender():
     conn.close()
     return redirect(url_for('index'))
 
-# Mover producto al Depósito de 60 Días
 @app.route('/mover_deposito/<int:id>')
 def mover_deposito(id):
     conn = conectar()
@@ -151,7 +224,6 @@ def mover_deposito(id):
     conn.close()
     return redirect(url_for('index'))
 
-# Devolver producto al Mostrador
 @app.route('/mover_mostrador/<int:id>')
 def mover_mostrador(id):
     conn = conectar()
@@ -164,7 +236,7 @@ def mover_mostrador(id):
 @app.route('/exportar')
 def exportar():
     conn = conectar()
-    df = pd.read_sql_query("SELECT id AS ID, codigo_barras AS Codigo, nombre AS Producto, viscosidad AS Viscosidad, presentacion AS Envase, precio_costo AS Costo, precio_venta AS Venta, stock_actual AS Stock, ubicacion AS Ubicacion, ultima_venta AS Ultima_Venta FROM productos", conn)
+    df = pd.read_sql_query("SELECT id AS ID, codigo_barras AS Codigo, nombre AS Producto, viscosidad AS Viscosidad, presentacion AS Envase, bulto_unidades AS Bulto_Unidades, precio_costo AS Costo, precio_venta AS Venta, stock_actual AS Stock FROM productos", conn)
     conn.close()
 
     output = io.BytesIO()
