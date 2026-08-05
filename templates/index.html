@@ -14,7 +14,6 @@
             font-size: 18px; 
         }
 
-        /* HEADER PRINCIPAL */
         .header-container {
             display: flex;
             align-items: center;
@@ -26,28 +25,10 @@
             border: 1px solid #3a4153;
         }
 
-        .header-title {
-            font-size: 26px;
-            font-weight: bold;
-            color: #2ecc71; /* Verde alineado al logo */
-            margin: 0;
-        }
+        .header-title { font-size: 26px; font-weight: bold; color: #2ecc71; margin: 0; }
+        .logos-group { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 40px; object-fit: contain; background: #ffffff; padding: 4px 8px; border-radius: 6px; }
 
-        .logos-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo-img {
-            height: 40px;
-            object-fit: contain;
-            background: #ffffff;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-
-        /* NAVEGACIÓN Y PESTAÑAS */
         .navbar { 
             display: flex; 
             justify-content: center; 
@@ -70,36 +51,36 @@
             transition: 0.2s;
         }
 
-        .nav-btn:hover, .nav-btn.active { 
-            background: #2ecc71; 
-            border-color: #27ae60; 
-            color: #111;
-        }
-
+        .nav-btn:hover, .nav-btn.active { background: #2ecc71; border-color: #27ae60; color: #111; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* PANTALLA DE INICIO CON LOGO GRANDE */
+        /* TARJETA DE BIENVENIDA Y RELOJ */
         .welcome-card {
             background: #282d3b;
-            padding: 40px;
+            padding: 30px;
             border-radius: 12px;
             text-align: center;
             max-width: 650px;
-            margin: 20px auto;
+            margin: 0 auto 20px auto;
             border: 1px solid #3a4153;
             box-shadow: 0 6px 15px rgba(0,0,0,0.5);
         }
 
-        .main-logo-img {
-            width: 100%;
-            max-width: 420px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        .main-logo-img { width: 100%; max-width: 380px; border-radius: 12px; margin-bottom: 15px; }
+
+        /* RELOJ EN TIEMPO REAL */
+        .clock-card {
+            background: #11141a;
+            border: 2px solid #2ecc71;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
         }
 
-        /* FORMULARIOS Y TARJETAS */
+        #reloj-hora { font-size: 38px; font-weight: bold; color: #2ecc71; letter-spacing: 2px; }
+        #reloj-fecha { font-size: 20px; color: #b0b9c6; text-transform: capitalize; margin-top: 5px; }
+
         .card { 
             background: #282d3b; 
             padding: 25px; 
@@ -111,48 +92,15 @@
         }
 
         label { display: block; margin-top: 15px; font-weight: bold; color: #b0b9c6; }
-        
-        input, select { 
-            padding: 12px; 
-            margin-top: 6px; 
-            width: 100%; 
-            box-sizing: border-box; 
-            background: #1e222d; 
-            color: #fff; 
-            border: 2px solid #4a536b; 
-            border-radius: 6px; 
-            font-size: 16px; 
-        }
-
+        input, select { padding: 12px; margin-top: 6px; width: 100%; box-sizing: border-box; background: #1e222d; color: #fff; border: 2px solid #4a536b; border-radius: 6px; font-size: 16px; }
         input:focus, select:focus { border-color: #2ecc71; outline: none; }
 
-        .btn-submit { 
-            background: #27ae60; 
-            color: white; 
-            border: none; 
-            font-size: 20px; 
-            font-weight: bold; 
-            padding: 15px; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            width: 100%; 
-            margin-top: 20px; 
-        }
-
+        .btn-submit { background: #27ae60; color: white; border: none; font-size: 20px; font-weight: bold; padding: 15px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 20px; }
         .btn-submit:hover { background: #219150; }
         .btn-vender { background: #e67e22; }
         .btn-vender:hover { background: #d35400; }
 
-        /* TABLA MODO OSCURO */
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            background: #282d3b; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            font-size: 17px;
-        }
-
+        table { width: 100%; border-collapse: collapse; background: #282d3b; border-radius: 8px; overflow: hidden; font-size: 17px; }
         th, td { padding: 14px; border-bottom: 1px solid #3a4153; text-align: left; }
         th { background: #11141a; color: #2ecc71; font-size: 18px; }
         tr:hover { background-color: #32384a; }
@@ -164,7 +112,6 @@
 </head>
 <body>
 
-    <!-- CABECERA PRINCIPAL -->
     <div class="header-container">
         <h1 class="header-title">🛢️ OLEOS MINERALES SRL</h1>
         <div class="logos-group">
@@ -174,7 +121,6 @@
         </div>
     </div>
 
-    <!-- MENÚ / PESTAÑAS -->
     <div class="navbar">
         <button class="nav-btn active" onclick="openTab('inicio')">🏠 Inicio</button>
         <button class="nav-btn" onclick="openTab('inventario')">📦 Ver Inventario</button>
@@ -182,24 +128,29 @@
         <button class="nav-btn" onclick="openTab('venta')">🛒 Registrar Venta</button>
     </div>
 
-    <!-- PESTAÑA 0: INICIALIZACIÓN / BIENVENIDA CON LOGO GRANDE -->
+    <!-- PESTAÑA 0: INICIO CON CALENDARIO Y RELOJ SINCRO -->
     <div id="inicio" class="tab-content active">
         <div class="welcome-card">
             <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Oleos Minerales SRL" class="main-logo-img">
-            <h2 style="color: #fff; margin-top: 10px;">Sistema de Control de Stock y Ventas</h2>
-            <p style="color: #b0b9c6;">Seleccione una opción del menú superior para comenzar.</p>
-            <button class="btn-submit" onclick="openTab('inventario')" style="margin-top: 15px;">Ir al Inventario</button>
+            
+            <!-- RELOJ EN VIVO -->
+            <div class="clock-card">
+                <div id="reloj-hora">00:00:00</div>
+                <div id="reloj-fecha">Cargando fecha...</div>
+            </div>
+
+            <p style="color: #b0b9c6; margin-top: 15px;">Sistema de Control de Stock - Seleccione una opción del menú.</p>
+            <button class="btn-submit" onclick="openTab('inventario')" style="margin-top: 10px;">Ir al Inventario</button>
         </div>
     </div>
 
-   <!-- PESTAÑA 1: INVENTARIO COMPLETO Y EXPORTACIÓN -->
+    <!-- PESTAÑA 1: INVENTARIO -->
     <div id="inventario" class="tab-content">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h2>📦 Productos en Stock</h2>
             <a href="/exportar" class="btn-submit" style="text-decoration: none; padding: 10px 20px; width: auto; background: #27ae60;">📥 Descargar Inventario (Excel)</a>
         </div>
 
-        <!-- Carga Masiva desde Excel -->
         <div class="card" style="max-width: 100%; margin-bottom: 20px; padding: 15px;">
             <h4 style="margin: 0 0 10px 0; color: #3498db;">📊 Cargar Listado Masivo (Excel)</h4>
             <form action="/importar" method="POST" enctype="multipart/form-data" style="display: flex; gap: 15px; align-items: center;">
@@ -313,7 +264,27 @@
         </div>
     </div>
 
+    <!-- SCRIPT JAVASCRIPT: RELOJ TIEMPO REAL Y PESTAÑAS -->
     <script>
+        function actualizarReloj() {
+            const ahora = new Date();
+            
+            // Formato de hora: HH:MM:SS
+            const horas = String(ahora.getHours()).padStart(2, '0');
+            const minutos = String(ahora.getMinutes()).padStart(2, '0');
+            const segundos = String(ahora.getSeconds()).padStart(2, '0');
+            document.getElementById('reloj-hora').textContent = `${horas}:${minutos}:${segundos}`;
+
+            // Formato de fecha completo en español
+            const opcionesFecha = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const fechaTexto = ahora.toLocaleDateString('es-ES', opcionesFecha);
+            document.getElementById('reloj-fecha').textContent = fechaTexto;
+        }
+
+        // Actualiza el reloj cada 1 segundo (1000 ms)
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj(); // Ejecutar inmediatamente al cargar
+
         function openTab(tabName) {
             let contents = document.getElementsByClassName("tab-content");
             for (let i = 0; i < contents.length; i++) {
@@ -325,7 +296,6 @@
             }
             document.getElementById(tabName).classList.add("active");
             
-            // Buscar el botón correspondiente para marcarlo activo
             let activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(tabName));
             if (activeBtn) activeBtn.classList.add("active");
         }
