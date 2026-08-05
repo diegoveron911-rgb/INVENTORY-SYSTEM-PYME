@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
+from database import init_db
 
 app = Flask(__name__)
 
@@ -14,6 +15,32 @@ def index():
     productos = cursor.fetchall()
     conn.close()
     return render_template('index.html', productos=productos)
+
+@app.route('/agregar', methods=['POST'])
+def agregar():
+    marca = request.form['marca']
+    nombre_linea = request.form['nombre']
+    # Combinamos la marca con la línea para que quede ordenado (Ej: "AMA - Full Synthetic")
+    nombre_completo = f"{marca} - {nombre_linea}"
+    
+    viscosidad = request.form['viscosidad']
+    presentacion = request.form['presentacion']
+    codigo_barras = request.form.get('codigo_barras', '')
+    precio_costo = float(request.form['precio_costo'])
+    precio_venta = float(request.form['precio_venta'])
+    stock = int(request.form['stock'])
+    stock_minimo = int(request.form['stock_minimo'])
+
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO productos (codigo_barras, nombre, viscosidad, presentacion, precio_costo, precio_venta, stock_actual, stock_minimo)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (codigo_barras, nombre_completo, viscosidad, presentacion, precio_costo, precio_venta, stock, stock_minimo))
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('index'))
 
 @app.route('/vender', methods=['POST'])
 def vender():
@@ -34,5 +61,5 @@ def vender():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    # host='0.0.0.0' permite que otras compus o la máquina virtual accedan
+    init_db()
     app.run(host='0.0.0.0', port=5000, debug=True)

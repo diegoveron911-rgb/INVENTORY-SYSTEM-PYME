@@ -4,48 +4,129 @@
     <meta charset="UTF-8">
     <title>Lubricentro - Control de Inventario</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
-        h1 { color: #333; }
-        table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 20px; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f4f6f9; color: #333; }
+        h1 { color: #1a252f; margin-bottom: 20px; }
+        .grid-container { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex: 1; min-width: 300px; }
+        .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 8px; }
+        label { display: block; margin-top: 10px; font-weight: bold; font-size: 0.9em; }
+        input, select, button { padding: 9px; margin-top: 4px; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #27ae60; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        button:hover { background: #219150; }
+        .btn-vender { background: #e67e22; }
+        .btn-vender:hover { background: #d35400; }
+        table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         th { background: #2c3e50; color: white; }
-        .card { background: #fff; padding: 15px; border-radius: 5px; margin-bottom: 20px; width: 300px; }
-        input, button { padding: 8px; margin: 5px 0; width: 90%; }
-        button { background: #27ae60; color: white; border: none; cursor: pointer; }
+        tr:hover { background-color: #f1f1f1; }
+        .badge { background: #3498db; color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.85em; }
     </style>
 </head>
 <body>
-    <h1>🛢️ Control de Inventario - Lubricantes</h1>
+    <h1>🛢️ Control de Inventario - Lubricentro</h1>
 
-    <div class="card">
-        <h3>Registrar Venta Rápida</h3>
-        <form action="/vender" method="POST">
-            <input type="number" name="id_producto" placeholder="ID del Producto" required>
-            <input type="number" name="cantidad" placeholder="Cantidad" value="1" required>
-            <button type="submit">Descontar Stock</button>
-        </form>
+    <div class="grid-container">
+        <!-- FORMULARIO 1: CARGA DE LUBRICANTES POR MARCA -->
+        <div class="card">
+            <h3>➕ Cargar Nuevo Lubricante</h3>
+            <form action="/agregar" method="POST">
+                <label>Marca:</label>
+                <select name="marca" required>
+                    <option value="AMA">AMA Lubricants</option>
+                    <option value="GULF">GULF</option>
+                    <option value="ENI">ENI / Agip</option>
+                    <option value="OTRA">Otra Marca</option>
+                </select>
+
+                <label>Nombre / Línea de Producto:</label>
+                <input type="text" name="nombre" placeholder="Ej: Full Synthetic / GP Line / Formula L" required>
+
+                <label>Viscosidad:</label>
+                <input type="text" name="viscosidad" placeholder="Ej: 5W-30, 10W-40, 20W-50" required>
+
+                <label>Presentación / Envase:</label>
+                <select name="presentacion" required>
+                    <option value="1L">Empaque 1 Litro</option>
+                    <option value="4L">Empaque 4 Litros</option>
+                    <option value="Balde 20L">Balde 20 Litros</option>
+                    <option value="Tambor 208L">Tambor 208 Litros</option>
+                </select>
+
+                <label>Código de Barras (Opcional):</label>
+                <input type="text" name="codigo_barras" placeholder="Escanear o tipear código">
+
+                <div style="display: flex; gap: 10px;">
+                    <div>
+                        <label>Precio Costo ($):</label>
+                        <input type="number" step="0.01" name="precio_costo" required>
+                    </div>
+                    <div>
+                        <label>Precio Venta ($):</label>
+                        <input type="number" step="0.01" name="precio_venta" required>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div>
+                        <label>Stock Inicial:</label>
+                        <input type="number" name="stock" value="10" required>
+                    </div>
+                    <div>
+                        <label>Stock Mínimo:</label>
+                        <input type="number" name="stock_minimo" value="3" required>
+                    </div>
+                </div>
+
+                <button type="submit">Guardar Producto</button>
+            </form>
+        </div>
+
+        <!-- FORMULARIO 2: VENTAS RÁPIDAS -->
+        <div class="card" style="max-width: 320px;">
+            <h3>🛒 Registrar Venta</h3>
+            <form action="/vender" method="POST">
+                <label>ID del Producto:</label>
+                <input type="number" name="id_producto" placeholder="Ej: 1" required>
+
+                <label>Cantidad Vendida:</label>
+                <input type="number" name="cantidad" value="1" min="1" required>
+
+                <button type="submit" class="btn-vender">Descontar del Stock</button>
+            </form>
+        </div>
     </div>
 
-    <h2>Stock Actual</h2>
+    <!-- TABLA DE PRODUCTOS EN STOCK -->
+    <h2>📦 Inventario Actual</h2>
     <table>
-        <tr>
-            <th>ID</th>
-            <th>Producto</th>
-            <th>Viscosidad</th>
-            <th>Envase</th>
-            <th>Precio</th>
-            <th>Stock</th>
-        </tr>
-        {% for p in productos %}
-        <tr>
-            <td>{{ p[0] }}</td>
-            <td><b>{{ p[1] }}</b></td>
-            <td>{{ p[2] }}</td>
-            <td>{{ p[3] }}</td>
-            <td>${{ p[4] }}</td>
-            <td><b>{{ p[5] }}</b></td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Marca / Producto</th>
+                <th>Viscosidad</th>
+                <th>Presentación</th>
+                <th>P. Venta</th>
+                <th>Stock Actual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+            <tr>
+                <td><b>#{{ p[0] }}</b></td>
+                <td><span class="badge">{{ p[1] }}</span></td>
+                <td>{{ p[2] }}</td>
+                <td>{{ p[3] }}</td>
+                <td>${{ "%.2f"|format(p[4]) }}</td>
+                <td>
+                    {% if p[5] <= 3 %}
+                        <span style="color: red; font-weight: bold;">⚠️ {{ p[5] }} unid.</span>
+                    {% else %}
+                        <span style="color: green; font-weight: bold;">{{ p[5] }} unid.</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </body>
 </html>
