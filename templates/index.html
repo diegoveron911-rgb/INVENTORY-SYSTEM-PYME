@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lubricentro - Control de Inventario</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 20px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background: #2c3e50; color: white; }
+        .card { background: #fff; padding: 15px; border-radius: 5px; margin-bottom: 20px; width: 300px; }
+        input, button { padding: 8px; margin: 5px 0; width: 90%; }
+        button { background: #27ae60; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🛢️ Control de Inventario - Lubricantes</h1>
+
+    <div class="card">
+        <h3>Registrar Venta Rápida</h3>
+        <form action="/vender" method="POST">
+            <input type="number" name="id_producto" placeholder="ID del Producto" required>
+            <input type="number" name="cantidad" placeholder="Cantidad" value="1" required>
+            <button type="submit">Descontar Stock</button>
+        </form>
+    </div>
+
+    <h2>Stock Actual</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Viscosidad</th>
+            <th>Envase</th>
+            <th>Precio</th>
+            <th>Stock</th>
+        </tr>
+        {% for p in productos %}
+        <tr>
+            <td>{{ p[0] }}</td>
+            <td><b>{{ p[1] }}</b></td>
+            <td>{{ p[2] }}</td>
+            <td>{{ p[3] }}</td>
+            <td>${{ p[4] }}</td>
+            <td><b>{{ p[5] }}</b></td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
