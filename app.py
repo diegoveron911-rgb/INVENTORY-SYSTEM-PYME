@@ -15,23 +15,34 @@ def index():
     conn = conectar()
     cursor = conn.cursor()
     
-    # Cargar productos activos del mostrador
+    # Cargar productos del mostrador junto con la suma de unidades reservadas pendientes
     cursor.execute('''
-        SELECT id, codigo_barras, nombre, viscosidad, presentacion, bulto_unidades, precio_venta, stock_actual, ultima_venta 
-        FROM productos 
-        WHERE ubicacion = 'MOSTRADOR'
+        SELECT 
+            p.id, 
+            p.codigo_barras, 
+            p.nombre, 
+            p.viscosidad, 
+            p.presentacion, 
+            p.bulto_unidades, 
+            p.precio_costo, 
+            p.precio_venta, 
+            p.stock_actual, 
+            p.ultima_venta,
+            COALESCE(SUM(CASE WHEN r.estado = 'PENDIENTE' THEN r.cantidad ELSE 0 END), 0) AS reservado_pendiente
+        FROM productos p
+        LEFT JOIN reservas r ON p.id = r.producto_id
+        WHERE p.ubicacion = 'MOSTRADOR'
+        GROUP BY p.id
     ''')
     productos = cursor.fetchall()
 
-    # Cargar productos del Depósito 60D
     cursor.execute('''
-        SELECT id, nombre, viscosidad, presentacion, bulto_unidades, precio_venta, stock_actual, ultima_venta 
+        SELECT id, nombre, viscosidad, presentacion, bulto_unidades, precio_costo, precio_venta, stock_actual, ultima_venta 
         FROM productos 
         WHERE ubicacion = 'DEPOSITO_60D'
     ''')
     productos_deposito = cursor.fetchall()
 
-    # Cargar reservas pendientes para el mostrador
     cursor.execute('''
         SELECT r.id, p.nombre, p.viscosidad, p.presentacion, r.empleado_nombre, r.cantidad, r.estado, r.fecha, p.stock_actual
         FROM reservas r
@@ -43,7 +54,6 @@ def index():
 
     hace_60_dias = (datetime.now() - timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S')
 
-    # Métricas de consumo
     cursor.execute("SELECT SUM(litros_totales) FROM historial_ventas")
     total_litros = cursor.fetchone()[0] or 0.0
 
@@ -52,7 +62,7 @@ def index():
         FROM historial_ventas 
         GROUP BY marca 
         ORDER BY litros DESC 
-        LIMIT 3
+        LIMIT 5
     ''')
     top_marcas = cursor.fetchall()
 
@@ -61,9 +71,29 @@ def index():
         FROM historial_ventas 
         GROUP BY viscosidad 
         ORDER BY litros DESC 
-        LIMIT 3
+        LIMIT 5
     ''')
     top_viscosidades = cursor.fetchall()
+
+    # CÁLCULO INTELIGENTE DE STOCK BAJO Y AGOTADOS
+    stock_bajo_count = 0
+    agotados_count = 0
+
+    for p in productos:
+        stock = p[8]  # stock_actual
+        presentacion = str(p[4]).upper() if p[4] else ""
+
+        if stock is None or stock == 0:
+            agotados_count += 1
+        else:
+            # Si es envase grande (20L, 204L, Tambor, Balde)
+            if any(x in presentacion for x in ['20', '204', 'TAMBOR', 'BALDE']):
+                if stock == 0:
+                    stock_bajo_count += 1
+            # Si es envase chico (botellas/latas)
+            else:
+                if 1 <= stock <= 3:
+                    stock_bajo_count += 1
 
     conn.close()
 
@@ -75,10 +105,10 @@ def index():
         hace_60_dias=hace_60_dias,
         total_litros=total_litros,
         top_marcas=top_marcas,
-        top_viscosidades=top_viscosidades
+        top_viscosidades=top_viscosidades,
+        stock_bajo_count=stock_bajo_count,
+        agotados_count=agotados_count
     )
-
-# --- SISTEMA DE RESERVAS REMOTAS ---
 
 @app.route('/crear_reserva', methods=['POST'])
 def crear_reserva():
@@ -88,8 +118,6 @@ def crear_reserva():
 
     conn = conectar()
     cursor = conn.cursor()
-    
-    # Verificar si hay stock suficiente
     cursor.execute("SELECT stock_actual FROM productos WHERE id = ?", (id_prod,))
     prod = cursor.fetchone()
 
@@ -107,7 +135,6 @@ def crear_reserva():
 def aprobar_reserva(id):
     conn = conectar()
     cursor = conn.cursor()
-    
     cursor.execute("SELECT producto_id, cantidad FROM reservas WHERE id = ?", (id,))
     res = cursor.fetchone()
     
@@ -124,11 +151,8 @@ def aprobar_reserva(id):
             precio_total = cantidad * precio_venta
             fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-            # Descontar stock y aprobar reserva
             cursor.execute("UPDATE productos SET stock_actual = ?, ultima_venta = ? WHERE id = ?", (nuevo_stock, fecha_actual, id_prod))
             cursor.execute("UPDATE reservas SET estado = 'APROBADO' WHERE id = ?", (id,))
-            
-            # Registrar historial de ventas
             cursor.execute('''
                 INSERT INTO historial_ventas (producto_id, marca, viscosidad, presentacion, cantidad, litros_totales, precio_total, fecha)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -147,8 +171,6 @@ def rechazar_reserva(id):
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
-
-# --- EDICIÓN Y VENTAS DIRECTAS ---
 
 @app.route('/editar_stock', methods=['POST'])
 def editar_stock():
@@ -236,7 +258,7 @@ def mover_mostrador(id):
 @app.route('/exportar')
 def exportar():
     conn = conectar()
-    df = pd.read_sql_query("SELECT id AS ID, codigo_barras AS Codigo, nombre AS Producto, viscosidad AS Viscosidad, presentacion AS Envase, bulto_unidades AS Bulto_Unidades, precio_costo AS Costo, precio_venta AS Venta, stock_actual AS Stock FROM productos", conn)
+    df = pd.read_sql_query("SELECT id AS ID, codigo_barras AS Codigo, nombre AS Producto, viscosidad AS Viscosidad, presentacion AS Envase, bulto_unidades AS Bulto_Unidades, precio_costo AS Costo_Neto, precio_venta AS Venta_Final, stock_actual AS Stock FROM productos", conn)
     conn.close()
 
     output = io.BytesIO()

@@ -3,307 +3,755 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OLEOS MINERALES SRL - Sistema de Gestión</title>
-    <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #1e222d; color: #e1e6ed; font-size: 18px; }
-        .header-container { display: flex; align-items: center; justify-content: space-between; background: #282d3b; padding: 15px 30px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #3a4153; }
-        .header-title { font-size: 26px; font-weight: bold; color: #2ecc71; margin: 0; }
-        .logos-group { display: flex; align-items: center; gap: 15px; }
-        .logo-img { height: 40px; object-fit: contain; background: #ffffff; padding: 4px 8px; border-radius: 6px; }
+    <title>ÓLEOS MINERALES SRL - Sistema de Gestión</title>
+    <!-- TIPOGRAFÍA MODERNIZADA -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- LIBRERÍA LECTORA DE CÓDIGOS DE BARRA -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- LIBRERÍA PARA BUSCADORES INTELIGENTES EN DESPLEGABLES -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
-        .navbar { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; background: #282d3b; padding: 10px; border-radius: 8px; flex-wrap: wrap; }
-        .nav-btn { background: #3a4153; color: #fff; border: 2px solid #4a536b; padding: 12px 20px; border-radius: 6px; font-size: 17px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .nav-btn:hover, .nav-btn.active { background: #2ecc71; border-color: #27ae60; color: #111; }
-        .tab-content { display: none; }
+    <style>
+        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; background: #161922; color: #e1e6ed; font-size: 16px; }
+        
+        /* DISEÑO ESTRUCTURAL DE DOS COLUMNAS */
+        .app-layout { 
+            display: flex; 
+            gap: 25px; 
+            width: 100%; 
+            max-width: 100%; 
+            box-sizing: border-box; 
+            align-items: flex-start; 
+        }
+        
+        .sidebar { 
+            width: 310px; 
+            min-width: 310px; 
+            background: #202430; 
+            padding: 22px; 
+            border-radius: 14px; 
+            border: 1px solid #2f3648; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5); 
+            box-sizing: border-box; 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        .sidebar-logo { width: 100%; max-width: 190px; border-radius: 10px; background: #ffffff; padding: 8px; margin: 0 auto 12px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .sidebar-title { font-size: 19px; font-weight: 700; color: #2ecc71; margin: 2px 0 8px 0; letter-spacing: 0.5px; }
+        
+        .sidebar-brands { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+        .brand-badge { height: 28px; object-fit: contain; background: #ffffff; padding: 4px 8px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        .sidebar-clock { background: #161922; border: 2px solid #2ecc71; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+        #reloj-hora { font-size: 26px; font-weight: 700; color: #2ecc71; letter-spacing: 1px; }
+        #reloj-fecha { font-size: 12px; color: #b0b9c6; text-transform: capitalize; margin-top: 2px; }
+
+        .btn-home-return { background: #282d3b; color: #2ecc71; border: 2px solid #2ecc71; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 15px; }
+        .btn-home-return:hover { background: #2ecc71; color: #111; }
+
+        .status-badge { background: #161922; border: 1px solid #2ecc71; padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .status-dot { height: 10px; width: 10px; background: #2ecc71; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #2ecc71; }
+
+        .main-panel { 
+            flex: 1; 
+            width: calc(100% - 335px); 
+            min-width: 0; 
+            box-sizing: border-box;
+        }
+
+        .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
 
-        .welcome-card { background: #282d3b; padding: 30px; border-radius: 12px; text-align: center; max-width: 650px; margin: 0 auto 20px auto; border: 1px solid #3a4153; box-shadow: 0 6px 15px rgba(0,0,0,0.5); }
-        .main-logo-img { width: 100%; max-width: 380px; border-radius: 12px; margin-bottom: 15px; }
+        /* BOTÓN VOLVER EN CABECERA DE MÓDULOS */
+        .btn-back-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #282d3b;
+            color: #2ecc71;
+            border: 2px solid #2ecc71;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 15px;
+        }
+        .btn-back-header:hover { background: #2ecc71; color: #111; transform: translateX(-3px); }
 
-        .clock-card { background: #11141a; border: 2px solid #2ecc71; padding: 15px; border-radius: 10px; margin: 15px 0; }
-        #reloj-hora { font-size: 38px; font-weight: bold; color: #2ecc71; letter-spacing: 2px; }
-        #reloj-fecha { font-size: 20px; color: #b0b9c6; text-transform: capitalize; margin-top: 5px; }
+        /* PANTALLA INICIO TIPO DASHBOARD CON ESTANTERÍA */
+        .home-dashboard { 
+            background: linear-gradient(rgba(17, 20, 26, 0.75), rgba(17, 20, 26, 0.75)), url("{{ url_for('static', filename='estanteria.jpeg') }}");
+            background-size: cover;
+            background-position: center;
+            width: 100%;
+            min-height: 620px;
+            border-radius: 16px; 
+            border: 2px solid #2ecc71; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.7); 
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-        .card { background: #282d3b; padding: 25px; border-radius: 10px; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid #3a4153; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #b0b9c6; }
-        input, select { padding: 12px; margin-top: 6px; width: 100%; box-sizing: border-box; background: #1e222d; color: #fff; border: 2px solid #4a536b; border-radius: 6px; font-size: 16px; }
+        .dashboard-header { text-align: center; margin-bottom: 40px; }
+        .dashboard-header h2 { font-size: 32px; color: #2ecc71; margin: 0; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+        .dashboard-header p { font-size: 18px; color: #e1e6ed; margin-top: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 20px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+
+        .dash-card { 
+            background: rgba(32, 36, 48, 0.85); 
+            border: 2px solid #3a4153; 
+            border-radius: 12px; 
+            padding: 25px 20px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.25s ease; 
+            backdrop-filter: blur(6px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
         
-        .search-box { background: #11141a; border: 2px solid #2ecc71; padding: 15px; font-size: 20px; border-radius: 8px; margin-bottom: 20px; color: #2ecc71; font-weight: bold; }
+        .dash-card:hover { 
+            border-color: #2ecc71; 
+            transform: translateY(-5px); 
+            background: rgba(46, 204, 113, 0.9); 
+            color: #111; 
+        }
+        
+        .dash-card:hover .dash-icon { transform: scale(1.15); color: #111; }
+        .dash-card:hover .dash-title { color: #111; }
 
-        .btn-submit { background: #27ae60; color: white; border: none; font-size: 20px; font-weight: bold; padding: 15px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 20px; }
+        .dash-icon { font-size: 38px; margin-bottom: 10px; transition: 0.2s; color: #2ecc71; }
+        .dash-title { font-size: 18px; font-weight: 700; color: #ffffff; }
+
+        .card { background: #202430; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #2f3648; }
+        label { display: block; margin-top: 15px; font-weight: 600; color: #b0b9c6; }
+        input, select { padding: 12px; margin-top: 6px; width: 100%; box-sizing: border-box; background: #161922; color: #fff; border: 2px solid #3a4153; border-radius: 8px; font-size: 16px; }
+        
+        .search-box { background: #161922; border: 2px solid #2ecc71; padding: 15px; font-size: 18px; border-radius: 8px; margin-bottom: 20px; color: #2ecc71; font-weight: bold; }
+
+        .btn-submit { background: #27ae60; color: white; border: none; font-size: 18px; font-weight: 600; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.2s; }
+        .btn-submit:hover { background: #219653; }
         .btn-vender { background: #e67e22; }
 
-        table { width: 100%; border-collapse: collapse; background: #282d3b; border-radius: 8px; overflow: hidden; font-size: 17px; }
-        th, td { padding: 12px; border-bottom: 1px solid #3a4153; text-align: left; }
-        th { background: #11141a; color: #2ecc71; font-size: 18px; }
-        tr:hover { background-color: #32384a; }
+        table { width: 100%; border-collapse: collapse; background: #202430; border-radius: 10px; overflow: hidden; font-size: 16px; }
+        th, td { padding: 14px; border-bottom: 1px solid #2f3648; text-align: left; }
+        th { background: #161922; color: #2ecc71; font-size: 17px; }
+        
+        .row-reservado { background-color: #1a1e27 !important; color: #7f8c8d !important; }
+        .row-reservado td { border-bottom: 1px dashed #f39c12; }
 
-        .badge { background: #27ae60; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
-        .bulto-tag { background: #3498db; color: white; padding: 3px 8px; border-radius: 4px; font-size: 14px; font-weight: bold; }
-        .stock-ok { color: #2ecc71; font-weight: bold; }
-        .stock-low { color: #e74c3c; font-weight: bold; }
-        .btn-approve { background: #27ae60; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; }
-        .btn-reject { background: #e74c3c; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; margin-left: 5px; }
+        .clickable-row:hover { background-color: #282d3b !important; cursor: pointer; }
+
+        /* ESTILOS DE TABLA DE RESERVAS CORREGIDOS */
+        .badge { background: #27ae60; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; display: inline-block; max-width: 100%; white-space: normal; line-height: 1.3; }
+        .badge-reserva { background: #f39c12; color: #111; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 13px; }
+
+         .action-buttons-cell { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .btn-approve { background: #27ae60; color: white; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; white-space: nowrap; display: inline-block; }
+        .btn-approve:hover { background: #219653; }
+        .btn-reject { background: #e74c3c; color: white; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; white-space: nowrap; display: inline-block; margin-left: 0; }
+        .btn-reject:hover { background: #c0392b; }
+
+        /* ESTILOS TOM-SELECT ALTO CONTRASTE */
+        .ts-control { background-color: #161922 !important; color: #ffffff !important; border: 2px solid #2ecc71 !important; border-radius: 8px !important; padding: 12px !important; font-size: 16px !important; font-weight: 600 !important; }
+        .ts-control input { color: #ffffff !important; font-size: 16px !important; }
+        .ts-dropdown { background-color: #202430 !important; color: #ffffff !important; border: 2px solid #2ecc71 !important; border-radius: 8px !important; font-size: 16px !important; }
+        .ts-dropdown .option { padding: 12px 15px !important; color: #ffffff !important; border-bottom: 1px solid #2f3648 !important; }
+        .ts-dropdown .active { background-color: #3498db !important; color: #ffffff !important; font-weight: 700 !important; }
+
+        /* MODALES Y COMPROBANTE */
+        .modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-card { background: #202430; border: 2px solid #2ecc71; border-radius: 14px; padding: 25px; max-width: 550px; width: 90%; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.7); position: relative; }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 28px; font-weight: bold; color: #e74c3c; cursor: pointer; }
+        
+        .ticket-card { background: #ffffff; color: #000000; padding: 25px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .ticket-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 15px; }
+        .ticket-row { display: flex; justify-content: space-between; margin: 8px 0; }
+        .ticket-total { font-size: 22px; font-weight: bold; border-top: 2px solid #000; padding-top: 10px; margin-top: 15px; text-align: right; }
+
+        @media (max-width: 900px) {
+            .app-layout { flex-direction: column; }
+            .sidebar { width: 100%; box-sizing: border-box; }
+            .main-panel { width: 100%; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="header-container">
-        <h1 class="header-title">🛢️ OLEOS MINERALES SRL</h1>
-        <div class="logos-group">
-            <img src="{{ url_for('static', filename='ama.png') }}" alt="AMA" class="logo-img">
-            <img src="{{ url_for('static', filename='gulf.png') }}" alt="Gulf" class="logo-img">
-        </div>
-    </div>
+    <div class="app-layout">
+        <!-- PANEL IZQUIERDO (SIDEBAR LIMPIA) -->
+        <div class="sidebar">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Óleos Minerales SRL" class="sidebar-logo">
+            <h1 class="sidebar-title">ÓLEOS MINERALES SRL</h1>
+            
+            <div class="sidebar-brands">
+                <img src="{{ url_for('static', filename='ama.png') }}" alt="AMA" class="brand-badge">
+                <img src="{{ url_for('static', filename='gulf.png') }}" alt="Gulf" class="brand-badge">
+            </div>
 
-    <div class="navbar">
-        <button class="nav-btn active" onclick="openTab('inicio')">🏠 Inicio</button>
-        <button class="nav-btn" onclick="openTab('inventario')">📦 Mostrador</button>
-        <button class="nav-btn" onclick="openTab('reservas')">📱 Reservas ({{ reservas_pendientes|length }})</button>
-        <button class="nav-btn" onclick="openTab('deposito')">🏚️ Depósito 60D</button>
-        <button class="nav-btn" onclick="openTab('metricas')">📊 Métricas</button>
-        <button class="nav-btn" onclick="openTab('cargar')">➕ Cargar</button>
-        <button class="nav-btn" onclick="openTab('venta')">🛒 Venta Directa</button>
-    </div>
-
-    <!-- INICIO -->
-    <div id="inicio" class="tab-content active">
-        <div class="welcome-card">
-            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Oleos Minerales SRL" class="main-logo-img">
-            <div class="clock-card">
+            <div class="sidebar-clock">
                 <div id="reloj-hora">00:00:00</div>
                 <div id="reloj-fecha">Cargando fecha...</div>
             </div>
-            <button class="btn-submit" onclick="openTab('inventario')">Ir al Mostrador</button>
-        </div>
-    </div>
 
-    <!-- MOSTRADOR CON BUSCADOR EN TIEMPO REAL -->
-    <div id="inventario" class="tab-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2>📦 Productos en Mostrador</h2>
-            <a href="/exportar" class="btn-submit" style="text-decoration: none; padding: 10px 20px; width: auto;">📥 Descargar Excel</a>
-        </div>
+            <button class="btn-home-return" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
 
-        <!-- BUSCADOR DINÁMICO -->
-        <input type="text" id="buscador" class="search-box" onkeyup="filtrarTabla()" placeholder="🔍 Buscar por Producto, Código, Marca o Viscosidad (Ej: 5W-30, AMA, Full Synthetic)...">
-
-        <table id="tabla-productos">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Código</th>
-                    <th>Producto</th>
-                    <th>Viscosidad</th>
-                    <th>Bulto Cerrado</th>
-                    <th>P. Venta</th>
-                    <th>Stock Actual</th>
-                    <th>Ajustar Stock</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in productos %}
-                <tr>
-                    <td><b>#{{ p[0] }}</b></td>
-                    <td><code>{{ p[1] }}</code></td>
-                    <td><span class="badge">{{ p[2] }}</span></td>
-                    <td><b>{{ p[3] }}</b></td>
-                    <td><span class="bulto-tag">x{{ p[5] }} unid.</span> ({{ p[4] }})</td>
-                    <td><b>${{ "%.2f"|format(p[6]) }}</b></td>
-                    <td>
-                        {% if p[7] <= 3 %}
-                            <span class="stock-low">⚠️ {{ p[7] }} unid.</span>
-                        {% else %}
-                            <span class="stock-ok">{{ p[7] }} unid.</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <form action="/editar_stock" method="POST" style="display: flex; gap: 5px;">
-                            <input type="hidden" name="id_producto" value="{{ p[0] }}">
-                            <input type="number" name="nuevo_stock" value="{{ p[7] }}" style="width: 80px; padding: 5px; margin: 0;">
-                            <button type="submit" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">💾 Ok</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- RESERVAS REMOTAS (VENDEDORES EN RUTA Y OPERARIOS) -->
-    <div id="reservas" class="tab-content">
-        <h2>📱 Solicitudes de Reserva de Stock (Vendedores Remotos)</h2>
-        
-        <div class="card" style="margin-bottom: 25px;">
-            <h3>📝 Nueva Solicitud de Reserva (Desde Celular/Ruta)</h3>
-            <form action="/crear_reserva" method="POST">
-                <label>Nombre del Vendedor / Operario:</label>
-                <input type="text" name="vendedor" placeholder="Ej: Juan Pérez" required>
-
-                <label>ID del Producto a Reservar:</label>
-                <input type="number" name="id_producto" placeholder="Ingrese el N° de ID del producto" required>
-
-                <label>Cantidad de Unidades a Reservar:</label>
-                <input type="number" name="cantidad" value="1" min="1" required>
-
-                <button type="submit" class="btn-submit" style="background: #3498db;">Enviar Solicitud de Reserva</button>
-            </form>
+            <!-- ESTADO DEL SISTEMA -->
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span style="font-size: 13px; color: #2ecc71; font-weight: bold;">Sistema En Línea</span>
+            </div>
         </div>
 
-        <h3>⏳ Reservas Pendientes de Aprobación en Mostrador</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID Reserva</th>
-                    <th>Vendedor</th>
-                    <th>Producto</th>
-                    <th>Cantidad Solicitada</th>
-                    <th>Stock en Mostrador</th>
-                    <th>Fecha</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in reservas_pendientes %}
-                <tr>
-                    <td><b>#{{ r[0] }}</b></td>
-                    <td><b>{{ r[4] }}</b></td>
-                    <td><span class="badge">{{ r[1] }}</span> ({{ r[2] }})</td>
-                    <td><b>{{ r[5] }} unid.</b></td>
-                    <td>
-                        {% if r[8] >= r[5] %}
-                            <span class="stock-ok">✅ {{ r[8] }} Disponibles</span>
-                        {% else %}
-                            <span class="stock-low">❌ Solo {{ r[8] }} en Stock</span>
-                        {% endif %}
-                    </td>
-                    <td><small>{{ r[7] }}</small></td>
-                    <td>
-                        {% if r[8] >= r[5] %}
-                            <a href="/aprobar_reserva/{{ r[0] }}" class="btn-approve">Aprobar y Descontar</a>
-                        {% endif %}
-                        <a href="/rechazar_reserva/{{ r[0] }}" class="btn-reject">Rechazar</a>
-                    </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="7" style="text-align: center; color: #b0b9c6;">No hay reservas pendientes en este momento.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <!-- PANEL PRINCIPAL DERECHO -->
+        <div class="main-panel">
 
-    <!-- DEPÓSITO 60D -->
-    <div id="deposito" class="tab-content">
-        <h2>🏚️ Depósito de Inactivos (+60 Días Sin Ventas)</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Producto</th>
-                    <th>Bulto</th>
-                    <th>Stock</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in productos_deposito %}
-                <tr>
-                    <td><b>#{{ p[0] }}</b></td>
-                    <td>{{ p[1] }}</td>
-                    <td>x{{ p[4] }} unid.</td>
-                    <td>{{ p[6] }} unid.</td>
-                    <td><a href="/mover_mostrador/{{ p[0] }}" class="btn-submit" style="padding: 6px 12px; font-size: 14px; text-decoration: none;">Devolver a Mostrador</a></td>
-                </tr>
-                {% else %}
-                <tr><td colspan="5" style="text-align: center; color: #b0b9c6;">No hay productos archivados.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- MÉTRICAS -->
-    <div id="metricas" class="tab-content">
-        <h2>📊 Inteligencia de Ventas</h2>
-        <div class="card">
-            <h3>🛢️ Total Litros Vendidos</h3>
-            <p style="font-size: 32px; font-weight: bold; color: #2ecc71;">{{ "%.1f"|format(total_litros) }} Lts</p>
-        </div>
-    </div>
-
-    <!-- CARGAR PRODUCTO -->
-    <div id="cargar" class="tab-content">
-        <div class="card">
-            <h2>➕ Cargar Nuevo Lubricante</h2>
-            <form action="/agregar" method="POST">
-                <label>Marca:</label>
-                <select name="marca" required>
-                    <option value="AMA">AMA Lubricants</option>
-                    <option value="GULF">GULF</option>
-                    <option value="OTRA">Otra Marca</option>
-                </select>
-
-                <label>Nombre / Línea de Producto:</label>
-                <input type="text" name="nombre" required>
-
-                <label>Viscosidad:</label>
-                <input type="text" name="viscosidad" required>
-
-                <label>Presentación / Envase:</label>
-                <input type="text" name="presentacion" required>
-
-                <label>Unidades por Bulto Cerrado:</label>
-                <input type="number" name="bulto" value="12" required>
-
-                <div style="display: flex; gap: 15px;">
-                    <div style="flex: 1;">
-                        <label>Precio Costo ($):</label>
-                        <input type="number" step="0.01" name="precio_costo" required>
+            <!-- INICIO CON FONDO DE ESTANTERÍA Y TARJETAS DISTRIBUIDAS -->
+            <div id="inicio" class="tab-content active">
+                <div class="home-dashboard">
+                    <div class="dashboard-header">
+                        <h2>Panel General de Control</h2>
+                        <p>Selecciona una opción para acceder directamente al módulo deseado</p>
                     </div>
-                    <div style="flex: 1;">
-                        <label>Precio Venta ($):</label>
-                        <input type="number" step="0.01" name="precio_venta" required>
+
+                    <div class="dashboard-grid">
+                        <div class="dash-card" onclick="openTab('inventario')">
+                            <div class="dash-icon">📦</div>
+                            <div class="dash-title">Mostrador</div>
+                        </div>
+
+                        <div class="dash-card" onclick="openTab('escanear')">
+                            <div class="dash-icon">📷</div>
+                            <div class="dash-title">Escanear / Contar</div>
+                        </div>
+
+                        <div class="dash-card" onclick="openTab('reservas')">
+                            <div class="dash-icon">📱</div>
+                            <div class="dash-title">Reservas (<span id="count-reservas-dash">{{ reservas_pendientes|length }}</span>)</div>
+                        </div>
+
+                        <div class="dash-card" onclick="openTab('venta')">
+                            <div class="dash-icon">🛒</div>
+                            <div class="dash-title">Venta Directa</div>
+                        </div>
+
+                        <div class="dash-card" onclick="openTab('cargar')">
+                            <div class="dash-icon">➕</div>
+                            <div class="dash-title">Cargar Producto</div>
+                        </div>
+
+                        <div class="dash-card" onclick="openTab('metricas')">
+                            <div class="dash-icon">📊</div>
+                            <div class="dash-title">Métricas</div>
+                        </div>
+
+                        <div class="dash-card" onclick="openTab('deposito')">
+                            <div class="dash-icon">🏚️</div>
+                            <div class="dash-title">Depósito 60D</div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <label>Stock Inicial (Unidades):</label>
-                <input type="number" name="stock" value="12" required>
+            <!-- MOSTRADOR CON BUSCADOR -->
+            <div id="inventario" class="tab-content">
+                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
+                <div class="card" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; color: #2ecc71;">📦 Productos en Mostrador</h2>
+                    <a href="/exportar" class="btn-submit" style="margin-top: 0; text-decoration: none; padding: 10px 20px; width: auto;">📥 Descargar Excel</a>
+                </div>
 
-                <button type="submit" class="btn-submit">Guardar Producto</button>
-            </form>
+                <input type="text" id="buscador" class="search-box" onkeyup="filtrarTabla()" placeholder="🔍 Buscar por Producto, Código, Marca o Viscosidad...">
+
+                <table id="tabla-productos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Viscosidad</th>
+                            <th>Bulto Cerrado</th>
+                            <th>P. Venta Bulto</th>
+                            <th>Stock Actual</th>
+                            <th>Ajustar Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in productos %}
+                        <tr class="clickable-row {% if p[10] > 0 %}row-reservado{% endif %}" 
+                            data-id="{{ p[0] }}"
+                            data-codigo="{{ p[1] }}" 
+                            data-nombre="{{ p[2] }}" 
+                            data-viscosidad="{{ p[3] }}" 
+                            data-presentacion="{{ p[4] }}" 
+                            data-bulto="{{ p[5] }}" 
+                            data-costo="{{ p[6] }}" 
+                            data-venta="{{ p[7] }}"
+                            data-stock="{{ p[8] }}"
+                            onclick="lanzarModal(this)">
+                            <td><b>#{{ p[0] }}</b></td>
+                            <td><code>{{ p[1] }}</code></td>
+                            <td>
+                                <span class="badge">{{ p[2] }}</span>
+                                {% if p[10] > 0 %}
+                                    <span class="badge-reserva">⏳ RESERVA PENDIENTE ({{ p[10] }} u.)</span>
+                                {% endif %}
+                            </td>
+                            <td><b>{{ p[3] }}</b></td>
+                            <td><span class="bulto-tag">x{{ p[5] }} unid.</span> ({{ p[4] }})</td>
+                            <td><b>${{ "%.2f"|format(p[7]) }}</b></td>
+                            <td>
+                                {% if p[8] <= 3 %}
+                                    <span class="stock-low">⚠️ {{ p[8] }} unid.</span>
+                                {% else %}
+                                    <span class="stock-ok">{{ p[8] }} unid.</span>
+                                {% endif %}
+                            </td>
+                            <td onclick="event.stopPropagation();">
+                                <form action="/editar_stock" method="POST" style="display: flex; gap: 5px;">
+                                    <input type="hidden" name="id_producto" value="{{ p[0] }}">
+                                    <input type="number" name="nuevo_stock" value="{{ p[8] }}" style="width: 80px; padding: 5px; margin: 0;">
+                                    <button type="submit" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">💾 Ok</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ESCANEAR -->
+            <div id="escanear" class="tab-content">
+                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
+                <div class="card" style="text-align: center;">
+                    <h2>📷 Escáner de Código de Barras (Control / Cierre)</h2>
+                    <p style="color: #b0b9c6;">Apunta la cámara del celular al código del producto o digita el código con lector físico.</p>
+
+                    <button type="button" class="btn-submit" onclick="iniciarCamara('reader', 'input-codigo-scanner')" style="background: #3498db; margin-bottom: 15px; max-width: 300px; margin-left: auto; margin-right: auto;">▶️ Encender Cámara</button>
+                    
+                    <div id="reader" style="width: 100%; max-width: 500px; margin: 0 auto; border-radius: 10px; overflow: hidden; margin-bottom: 20px;"></div>
+
+                    <input type="text" id="input-codigo-scanner" class="search-box" placeholder="O ingrese/escanee código aquí..." onchange="buscarProductoPorCodigo(this.value)">
+
+                    <div id="resultado-escaneo" class="card" style="display: none; background: #161922; border: 2px solid #2ecc71; margin-top: 20px; text-align: left;">
+                        <h3 id="scan-nombre" style="color: #2ecc71; margin-top: 0;">--</h3>
+                        <p id="scan-detalles" style="color: #b0b9c6;">--</p>
+                        <div style="font-size: 20px; margin: 15px 0;">Stock Actual registrado: <b id="scan-stock" style="color: #3498db;">0</b> unid.</div>
+
+                        <form action="/editar_stock" method="POST">
+                            <input type="hidden" id="scan-id-producto" name="id_producto" value="">
+                            <label>Nuevo Stock Real en Estantería:</label>
+                            <input type="number" id="scan-nuevo-stock" name="nuevo_stock" value="0" min="0" required style="font-size: 22px; text-align: center; font-weight: bold;">
+                            <button type="submit" class="btn-submit" style="background: #27ae60;">💾 Confirmar y Guardar Stock Real</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VENTA DIRECTA -->
+            <div id="venta" class="tab-content">
+                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
+                <div class="card">
+                    <h2>🛒 Registrar Venta Rápida con Escáner</h2>
+                    
+                    <button type="button" class="btn-submit" onclick="iniciarCamara('reader-venta', 'scanner-venta')" style="background: #e67e22; margin-bottom: 15px; max-width: 300px;">📷 Escanear con Cámara</button>
+                    <div id="reader-venta" style="width: 100%; max-width: 500px; border-radius: 10px; overflow: hidden; margin-bottom: 15px;"></div>
+
+                    <form action="/vender" method="POST" id="form-venta" onsubmit="generarComprobante(event)">
+                        <label>Buscar o Escanear Producto:</label>
+                        <select id="select-venta" name="id_producto" required>
+                            <option value="" disabled selected>-- Buscar por nombre, marca o viscosidad --</option>
+                            {% for p in productos %}
+                                <option value="{{ p[0] }}" data-codigo="{{ p[1] }}" data-nombre="{{ p[2] }}" data-precio="{{ p[7] }}">
+                                    {{ p[2] }} | {{ p[3] }} | {{ p[4] }} - ${{ "%.2f"|format(p[7]) }} (Stock: {{ p[8] }} u.)
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <label>Cantidad Vendida:</label>
+                        <input type="number" id="venta-cantidad" name="cantidad" value="1" min="1" required style="font-size: 20px; font-weight: bold;">
+
+                        <button type="submit" class="btn-submit btn-vender">🛒 Descontar del Stock y Emitir Ticket</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RESERVAS REMOTAS -->
+            <div id="reservas" class="tab-content">
+                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
+                <h2>📱 Solicitudes de Reserva de Stock</h2>
+                <div class="card" style="margin-bottom: 25px;">
+                    <h3>📝 Nueva Solicitud de Reserva</h3>
+                    <button type="button" class="btn-submit" onclick="iniciarCamara('reader-reserva', 'scanner-reserva')" style="background: #3498db; margin-bottom: 15px; max-width: 300px;">📷 Escanear Producto</button>
+                    <div id="reader-reserva" style="width: 100%; max-width: 500px; border-radius: 10px; overflow: hidden; margin-bottom: 15px;"></div>
+
+                    <form action="/crear_reserva" method="POST">
+                        <label>Nombre del Vendedor / Operario:</label>
+                        <input type="text" name="vendedor" placeholder="Ej: Juan Pérez" required>
+
+                        <label>Seleccionar Producto a Reservar:</label>
+                        <select id="select-reserva" name="id_producto" required>
+                            <option value="" disabled selected>-- Buscar o escanear lubricante --</option>
+                            {% for p in productos %}
+                                <option value="{{ p[0] }}" data-codigo="{{ p[1] }}">
+                                    {{ p[2] }} | Viscosidad: {{ p[3] }} | {{ p[4] }} (Stock: {{ p[8] }} u.)
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <label>Cantidad de Unidades a Reservar:</label>
+                        <input type="number" name="cantidad" value="1" min="1" required>
+
+                        <button type="submit" class="btn-submit" style="background: #3498db;">Enviar Solicitud de Reserva</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>⏳ Reservas Pendientes de Aprobación</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Reserva</th>
+                                <th>Vendedor</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Stock Mostrador</th>
+                                <th>Fecha</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in reservas_pendientes %}
+                            <tr>
+                                <td><b>#{{ r[0] }}</b></td>
+                                <td><b>{{ r[4] }}</b></td>
+                                <td><span class="badge">{{ r[1] }}</span> ({{ r[2] }})</td>
+                                <td><b>{{ r[5] }} unid.</b></td>
+                                <td>
+                                    {% if r[8] >= r[5] %}
+                                        <span class="stock-ok">✅ {{ r[8] }} Disponibles</span>
+                                    {% else %}
+                                        <span class="stock-low">❌ Solo {{ r[8] }} en Stock</span>
+                                    {% endif %}
+                                </td>
+                                <td><small>{{ r[7] }}</small></td>
+                                <td class="action-buttons-cell">
+                                 {% if r[8] >= r[5] %}
+                                <a href="/aprobar_reserva/{{ r[0] }}" class="btn-approve">Aprobar y Descontar</a>
+                                    {% endif %}
+                                <a href="/rechazar_reserva/{{ r[0] }}" class="btn-reject">Rechazar</a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="7" style="text-align: center; color: #b0b9c6;">No hay reservas pendientes.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DEPÓSITO 60D -->
+            <div id="deposito" class="tab-content">
+                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
+                <div class="card">
+                    <h2>🏚️ Depósito de Inactivos (+60 Días Sin Ventas)</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Producto</th>
+                                <th>Bulto</th>
+                                <th>Stock</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in productos_deposito %}
+                            <tr>
+                                <td><b>#{{ p[0] }}</b></td>
+                                <td>{{ p[1] }}</td>
+                                <td>x{{ p[4] }} unid.</td>
+                                <td>{{ p[7] }} unid.</td>
+                                <td><a href="/mover_mostrador/{{ p[0] }}" class="btn-submit" style="padding: 6px 12px; font-size: 14px; text-decoration: none; margin-top: 0;">Devolver a Mostrador</a></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" style="text-align: center; color: #b0b9c6;">No hay productos archivados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MÉTRICAS -->
+            <div id="metricas" class="tab-content">
+                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
+                <div class="card">
+                    <h2>📊 Inteligencia de Ventas y Consumo de Stock</h2>
+                    <div style="background: #161922; border: 2px solid #2ecc71; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h3 style="margin: 0; color: #b0b9c6;">🛢️ Total Litros Vendidos</h3>
+                        <div style="font-size: 36px; font-weight: bold; color: #2ecc71; margin-top: 5px;">{{ "%.1f"|format(total_litros) }} Lts</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARGAR PRODUCTO -->
+            <div id="cargar" class="tab-content">
+                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
+                <div class="card">
+                    <h2>➕ Cargar Nuevo Lubricante</h2>
+                    <form action="/agregar" method="POST">
+                        <label>Marca:</label>
+                        <select name="marca" required>
+                            <option value="AMA">AMA Lubricants</option>
+                            <option value="GULF">GULF</option>
+                            <option value="OTRA">Otra Marca</option>
+                        </select>
+
+                        <label>Código de Barras (Opcional):</label>
+                        <input type="text" name="codigo_barras" placeholder="Ej: 1000000779">
+
+                        <label>Nombre / Línea de Producto:</label>
+                        <input type="text" name="nombre" required>
+
+                        <label>Viscosidad:</label>
+                        <input type="text" name="viscosidad" required>
+
+                        <label>Presentación / Envase:</label>
+                        <input type="text" name="presentacion" required>
+
+                        <label>Unidades por Bulto Cerrado:</label>
+                        <input type="number" name="bulto" value="12" required>
+
+                        <div style="display: flex; gap: 15px;">
+                            <div style="flex: 1;">
+                                <label>Precio Costo Neto ($):</label>
+                                <input type="number" step="0.01" name="precio_costo" required>
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Precio Bulto Final ($):</label>
+                                <input type="number" step="0.01" name="precio_venta" required>
+                            </div>
+                        </div>
+
+                        <label>Stock Inicial (Unidades):</label>
+                        <input type="number" name="stock" value="12" required>
+
+                        <button type="submit" class="btn-submit">Guardar Producto</button>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- REGISTRAR VENTA DIRECTA -->
-    <div id="venta" class="tab-content">
-        <div class="card" style="max-width: 500px;">
-            <h2>🛒 Registrar Venta Rápida</h2>
-            <form action="/vender" method="POST">
-                <label>ID del Producto:</label>
-                <input type="number" name="id_producto" required>
+    <!-- MODAL COMPROBANTE DE VENTA -->
+    <div id="modal-ticket" class="modal-bg">
+        <div class="modal-card" style="background: transparent; border: none; padding: 0;">
+            <div class="ticket-card">
+                <div class="ticket-header">
+                    <h3 style="margin: 0;">ÓLEOS MINERALES SRL</h3>
+                    <small>COMPROBANTE NO VÁLIDO COMO FACTURA</small><br>
+                    <small id="ticket-fecha">00/00/0000 00:00</small>
+                </div>
+                <div class="ticket-row">
+                    <span>PRODUCTO:</span>
+                    <b id="ticket-prod">--</b>
+                </div>
+                <div class="ticket-row">
+                    <span>CANTIDAD:</span>
+                    <b id="ticket-cant">0 u.</b>
+                </div>
+                <div class="ticket-row">
+                    <span>PRECIO UNITARIO:</span>
+                    <span id="ticket-precio">$0.00</span>
+                </div>
+                <div class="ticket-total">
+                    TOTAL: <span id="ticket-total-val">$0.00</span>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button onclick="window.print()" style="flex: 1; padding: 10px; background: #3498db; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">🖨️ Imprimir</button>
+                    <button onclick="confirmarVentasForm()" style="flex: 1; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">✅ Descontar Stock</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <label>Cantidad Vendida:</label>
-                <input type="number" name="cantidad" value="1" min="1" required>
+    <!-- MODAL DETALLE MOSTRADOR -->
+    <div id="modal-detalle" class="modal-bg">
+        <div class="modal-card">
+            <span class="modal-close" onclick="cerrarModal()">&times;</span>
+            <h2 id="modal-titulo" style="color: #2ecc71; margin-top: 0;">--</h2>
+            <p id="modal-subtitulo" style="color: #b0b9c6; margin-bottom: 20px;">--</p>
+            
+            <div style="background: #161922; border-radius: 8px; padding: 15px; margin: 10px 0; border-left: 5px solid #2ecc71;">
+                <div style="font-size: 13px; color: #b0b9c6; text-transform: uppercase; font-weight: bold;">📦 PRECIO BULTO CERRADO (CON IVA 21%)</div>
+                <div id="modal-precio-bulto" style="font-size: 26px; font-weight: bold; color: #2ecc71;">$0.00</div>
+            </div>
 
-                <button type="submit" class="btn-submit btn-vender">Descontar del Stock</button>
-            </form>
+            <div style="background: #161922; border-radius: 8px; padding: 15px; margin: 10px 0; border-left: 5px solid #3498db;">
+                <div style="font-size: 13px; color: #3498db; text-transform: uppercase; font-weight: bold;">🧪 PRECIO UNITARIO / LITRO (CON IVA)</div>
+                <div id="modal-precio-unitario" style="font-size: 26px; font-weight: bold; color: #3498db;">$0.00</div>
+            </div>
         </div>
     </div>
 
     <script>
-        // BUSCADOR EN TIEMPO REAL
+        let selectVentaControl = null;
+        let selectReservaControl = null;
+        let html5QrcodeScanner = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            selectVentaControl = new TomSelect("#select-venta", { create: false, sortField: { field: "text", order: "asc" } });
+            selectReservaControl = new TomSelect("#select-reserva", { create: false, sortField: { field: "text", order: "asc" } });
+        });
+
+        function obtenerBaseProductos() {
+            const filas = document.querySelectorAll("#tabla-productos tbody tr");
+            const productos = [];
+            filas.forEach(tr => {
+                if (tr.dataset.id) {
+                    productos.push({
+                        id: parseInt(tr.dataset.id),
+                        codigo: tr.dataset.codigo || "",
+                        nombre: tr.dataset.nombre || "",
+                        viscosidad: tr.dataset.viscosidad || "",
+                        presentacion: tr.dataset.presentacion || "",
+                        bulto: parseInt(tr.dataset.bulto) || 1,
+                        stock: parseInt(tr.dataset.stock) || 0
+                    });
+                }
+            });
+            return productos;
+        }
+
+        function iniciarCamara(elementId, targetInputOrSelect) {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
+            }
+
+            html5QrcodeScanner = new Html5QrcodeScanner(elementId, { fps: 10, qrbox: { width: 250, height: 150 } });
+            html5QrcodeScanner.render((decodedText) => {
+                if (targetInputOrSelect === 'scanner-venta') {
+                    seleccionarPorCodigo(decodedText, selectVentaControl);
+                } else if (targetInputOrSelect === 'scanner-reserva') {
+                    seleccionarPorCodigo(decodedText, selectReservaControl);
+                } else {
+                    document.getElementById(targetInputOrSelect).value = decodedText;
+                    buscarProductoPorCodigo(decodedText);
+                }
+            });
+        }
+
+        function seleccionarPorCodigo(codigo, tomSelectControl) {
+            codigo = codigo.trim().toUpperCase();
+            const baseProductos = obtenerBaseProductos();
+            const prod = baseProductos.find(p => p.codigo.toUpperCase() === codigo || p.id.toString() === codigo);
+
+            if (prod && tomSelectControl) {
+                tomSelectControl.setValue(prod.id);
+                alert(`✅ Producto seleccionado: ${prod.nombre}`);
+            } else {
+                alert(`⚠️ No se encontró ningún producto asociado al código: ${codigo}`);
+            }
+        }
+function generarComprobante(event) {
+    event.preventDefault();
+    const select = document.getElementById("select-venta");
+    const selectedOption = select.options[select.selectedIndex];
+    
+    if (!selectedOption.value) return;
+
+    const nombre = selectedOption.dataset.nombre || selectedOption.text;
+    const cantidad = parseInt(document.getElementById("venta-cantidad").value);
+    const precioUnitario = parseFloat(selectedOption.dataset.precio || 0);
+    const total = cantidad * precioUnitario;
+
+    // FORMATO FORZADO A 24 HORAS (HH:MM:SS)
+    const fechaHora = new Date().toLocaleString('es-AR', { hour12: false });
+
+    document.getElementById("ticket-fecha").textContent = fechaHora;
+    document.getElementById("ticket-prod").textContent = nombre;
+    document.getElementById("ticket-cant").textContent = `${cantidad} u.`;
+    document.getElementById("ticket-precio").textContent = `$${precioUnitario.toFixed(2)}`;
+    document.getElementById("ticket-total-val").textContent = `$${total.toFixed(2)}`;
+
+    document.getElementById("modal-ticket").style.display = "flex";
+}
+
+        function confirmarVentasForm() {
+            document.getElementById("form-venta").submit();
+        }
+
+        function buscarProductoPorCodigo(codigo) {
+            codigo = codigo.trim().toUpperCase();
+            const baseProductos = obtenerBaseProductos();
+            const prod = baseProductos.find(p => p.codigo.toUpperCase() === codigo || p.id.toString() === codigo);
+
+            if (prod) {
+                document.getElementById("scan-id-producto").value = prod.id;
+                document.getElementById("scan-nombre").textContent = prod.nombre;
+                document.getElementById("scan-detalles").textContent = `Código: ${prod.codigo} | Viscosidad: ${prod.viscosidad} | ${prod.presentacion} (x${prod.bulto} u.)`;
+                document.getElementById("scan-stock").textContent = prod.stock;
+                document.getElementById("scan-nuevo-stock").value = prod.stock;
+                document.getElementById("resultado-escaneo").style.display = "block";
+            } else {
+                alert(`⚠️ No se encontró ningún producto con el código: ${codigo}`);
+            }
+        }
+
+        function lanzarModal(tr) {
+            let codigo = tr.dataset.codigo;
+            let nombre = tr.dataset.nombre;
+            let viscosidad = tr.dataset.viscosidad;
+            let presentacion = tr.dataset.presentacion;
+            let bulto = parseInt(tr.dataset.bulto);
+            let precioVentaFinal = parseFloat(tr.dataset.venta);
+
+            document.getElementById("modal-titulo").textContent = nombre;
+            document.getElementById("modal-subtitulo").textContent = `Código: ${codigo} | Viscosidad: ${viscosidad} | Envase: ${presentacion} (Bulto x${bulto} u.)`;
+            
+            let precioUnitarioFinal = precioVentaFinal / bulto;
+
+            document.getElementById("modal-precio-bulto").textContent = `$${precioVentaFinal.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+            document.getElementById("modal-precio-unitario").textContent = `$${precioUnitarioFinal.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+
+            document.getElementById("modal-detalle").style.display = "flex";
+        }
+
+        function cerrarModal() {
+            document.getElementById("modal-detalle").style.display = "none";
+            document.getElementById("modal-ticket").style.display = "none";
+        }
+
         function filtrarTabla() {
             let input = document.getElementById("buscador");
-            let filter = input.value.toUpperCase();
+            let terminos = input.value.toUpperCase().trim().split(/\s+/);
             let table = document.getElementById("tabla-productos");
             let tr = table.getElementsByTagName("tr");
 
             for (let i = 1; i < tr.length; i++) {
-                let textoFila = tr[i].textContent || tr[i].innerText;
-                if (textoFila.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
+                let textoFila = (tr[i].textContent || tr[i].innerText).toUpperCase();
+                let coincideTodos = terminos.every(termino => textoFila.includes(termino));
+                tr[i].style.display = coincideTodos ? "" : "none";
             }
         }
 
@@ -318,12 +766,34 @@
         function openTab(tabName) {
             let contents = document.getElementsByClassName("tab-content");
             for (let i = 0; i < contents.length; i++) contents[i].classList.remove("active");
-            let buttons = document.getElementsByClassName("nav-btn");
-            for (let i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
             document.getElementById(tabName).classList.add("active");
-            let activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(tabName));
-            if (activeBtn) activeBtn.classList.add("active");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // AUTO-REFRESH EN SEGUNDO PLANO CADA 10 SEGUNDOS
+        setInterval(function() {
+            fetch('/')
+                .then(response => response.text())
+                .then(html => {
+                    let parser = new DOMParser();
+                    let doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Actualiza la tabla de reservas si hay solicitudes nuevas
+                    let nuevaTablaRes = doc.querySelector("#reservas table");
+                    let tablaActualRes = document.querySelector("#reservas table");
+                    if (nuevaTablaRes && tablaActualRes) {
+                        tablaActualRes.innerHTML = nuevaTablaRes.innerHTML;
+                    }
+
+                    // Actualiza el contador de la tarjeta en el inicio
+                    let nuevoCount = doc.querySelector("#count-reservas-dash");
+                    let actualCount = document.querySelector("#count-reservas-dash");
+                    if (nuevoCount && actualCount) {
+                        actualCount.textContent = nuevoCount.textContent;
+                    }
+                })
+                .catch(err => console.log("Sincronizando...", err));
+        }, 10000);
     </script>
 </body>
 </html>
