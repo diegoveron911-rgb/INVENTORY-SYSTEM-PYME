@@ -18,9 +18,18 @@ def init_db():
             stock_actual INTEGER DEFAULT 0,
             stock_minimo INTEGER DEFAULT 5,
             ubicacion TEXT DEFAULT 'MOSTRADOR',
-            ultima_venta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ultima_venta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            activo INTEGER DEFAULT 1
         )
     ''')
+
+    # Migración automática para bases de datos ya creadas que no tienen la columna 'activo'
+    try:
+        cursor.execute("ALTER TABLE productos ADD COLUMN activo INTEGER DEFAULT 1")
+        print("Columna 'activo' añadida a la tabla 'productos'.")
+    except sqlite3.OperationalError:
+        # La columna ya existe en la base de datos
+        pass
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS historial_ventas (
@@ -51,7 +60,7 @@ def init_db():
 
     conn.commit()
     conn.close()
-    print("¡Base de datos reestructurada con éxito!")
+    print("¡Base de datos reestructurada e inicializada con éxito!")
 
 if __name__ == '__main__':
     init_db()

@@ -15,7 +15,6 @@
     <style>
         body { font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; background: #161922; color: #e1e6ed; font-size: 16px; }
         
-        /* DISEÑO ESTRUCTURAL DE DOS COLUMNAS */
         .app-layout { 
             display: flex; 
             gap: 25px; 
@@ -65,7 +64,6 @@
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
 
-        /* BOTÓN VOLVER EN CABECERA DE MÓDULOS */
         .btn-back-header {
             display: inline-flex;
             align-items: center;
@@ -83,7 +81,6 @@
         }
         .btn-back-header:hover { background: #2ecc71; color: #111; transform: translateX(-3px); }
 
-        /* PANTALLA INICIO TIPO DASHBOARD CON ESTANTERÍA */
         .home-dashboard { 
             background: linear-gradient(rgba(17, 20, 26, 0.75), rgba(17, 20, 26, 0.75)), url("{{ url_for('static', filename='estanteria.jpeg') }}");
             background-size: cover;
@@ -150,6 +147,8 @@
         .btn-submit { background: #27ae60; color: white; border: none; font-size: 18px; font-weight: 600; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.2s; }
         .btn-submit:hover { background: #219653; }
         .btn-vender { background: #e67e22; }
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
 
         table { width: 100%; border-collapse: collapse; background: #202430; border-radius: 10px; overflow: hidden; font-size: 16px; }
         th, td { padding: 14px; border-bottom: 1px solid #2f3648; text-align: left; }
@@ -160,11 +159,13 @@
 
         .clickable-row:hover { background-color: #282d3b !important; cursor: pointer; }
 
-        /* ESTILOS DE TABLA DE RESERVAS CORREGIDOS */
         .badge { background: #27ae60; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; display: inline-block; max-width: 100%; white-space: normal; line-height: 1.3; }
         .badge-reserva { background: #f39c12; color: #111; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 13px; }
+        .bulto-tag { background: #3498db; color: white; padding: 3px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; }
+        .stock-ok { color: #2ecc71; font-weight: 700; }
+        .stock-low { color: #e74c3c; font-weight: 700; }
 
-         .action-buttons-cell { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .action-buttons-cell { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .btn-approve { background: #27ae60; color: white; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; white-space: nowrap; display: inline-block; }
         .btn-approve:hover { background: #219653; }
         .btn-reject { background: #e74c3c; color: white; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; white-space: nowrap; display: inline-block; margin-left: 0; }
@@ -258,6 +259,11 @@
                             <div class="dash-title">Cargar Producto</div>
                         </div>
 
+                        <div class="dash-card" onclick="openTab('gestion_listas')">
+                            <div class="dash-icon">⚙️</div>
+                            <div class="dash-title">Gestión de Listas</div>
+                        </div>
+
                         <div class="dash-card" onclick="openTab('metricas')">
                             <div class="dash-icon">📊</div>
                             <div class="dash-title">Métricas</div>
@@ -331,6 +337,11 @@
                                     <input type="number" name="nuevo_stock" value="{{ p[8] }}" style="width: 80px; padding: 5px; margin: 0;">
                                     <button type="submit" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">💾 Ok</button>
                                 </form>
+                            </td>
+                            <td onclick="event.stopPropagation();">
+                             <form action="/dar_de_baja/{{ p[0] }}" method="POST" onsubmit="return confirm('⚠️ ¿Deseas dar de baja el producto {{ p[2] }}?')">
+                           <button type="submit" class="btn-submit btn-danger" style="padding: 6px 10px; font-size: 13px; margin: 0; width: auto;">🗑️ Dar de baja</button>
+                         </form>
                             </td>
                         </tr>
                         {% endfor %}
@@ -436,6 +447,7 @@
                                 <th>Stock Mostrador</th>
                                 <th>Fecha</th>
                                 <th>Acción</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -454,10 +466,10 @@
                                 </td>
                                 <td><small>{{ r[7] }}</small></td>
                                 <td class="action-buttons-cell">
-                                 {% if r[8] >= r[5] %}
-                                <a href="/aprobar_reserva/{{ r[0] }}" class="btn-approve">Aprobar y Descontar</a>
+                                    {% if r[8] >= r[5] %}
+                                        <a href="/aprobar_reserva/{{ r[0] }}" class="btn-approve">Aprobar y Descontar</a>
                                     {% endif %}
-                                <a href="/rechazar_reserva/{{ r[0] }}" class="btn-reject">Rechazar</a>
+                                    <a href="/rechazar_reserva/{{ r[0] }}" class="btn-reject">Rechazar</a>
                                 </td>
                             </tr>
                             {% else %}
@@ -500,23 +512,112 @@
                 </div>
             </div>
 
-            <!-- MÉTRICAS -->
+            <!-- MÉTRICAS Y RESUMEN MENSUAL -->
             <div id="metricas" class="tab-content">
                 <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
-                <div class="card">
-                    <h2>📊 Inteligencia de Ventas y Consumo de Stock</h2>
-                    <div style="background: #161922; border: 2px solid #2ecc71; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                        <h3 style="margin: 0; color: #b0b9c6;">🛢️ Total Litros Vendidos</h3>
-                        <div style="font-size: 36px; font-weight: bold; color: #2ecc71; margin-top: 5px;">{{ "%.1f"|format(total_litros) }} Lts</div>
+                
+                <div class="card" style="margin-bottom: 25px;">
+                    <h2 style="color: #2ecc71; margin-top: 0;">📊 Inteligencia de Ventas y Consumo</h2>
+                    <p style="color: #b0b9c6;">Resumen detallado de salidas por marca, graduación de viscosidad y cierres mensuales.</p>
+                </div>
+
+                <!-- TARJETA PRINCIPAL DE LITROS TOTALES -->
+                <div style="background: #161922; border: 2px solid #2ecc71; padding: 20px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
+                    <h3 style="margin: 0; color: #b0b9c6; text-transform: uppercase; font-size: 14px;">🛢️ Total General Acumulado</h3>
+                    <div style="font-size: 42px; font-weight: bold; color: #2ecc71; margin-top: 5px;">{{ "%.1f"|format(total_litros) }} Lts</div>
+                </div>
+
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px;">
+                    <!-- TABLA POR MARCA -->
+                    <div class="card" style="flex: 1; min-width: 300px;">
+                        <h3 style="color: #3498db; margin-top: 0;">🏷️ Consumo por Marca</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Marca</th>
+                                    <th>Litros Vendidos</th>
+                                    <th>Total ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in metricas_marca %}
+                                <tr>
+                                    <td><b>{{ m[0] }}</b></td>
+                                    <td><span class="stock-ok">{{ "%.1f"|format(m[1]) }} Lts</span></td>
+                                    <td><b>${{ "%.2f"|format(m[2]) }}</b></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="3" style="text-align: center; color: #b0b9c6;">Sin datos de ventas.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
+
+                    <!-- TABLA POR VISCOSIDAD / TIPO -->
+                    <div class="card" style="flex: 1; min-width: 300px;">
+                        <h3 style="color: #f39c12; margin-top: 0;">🧪 Consumo por Viscosidad</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Viscosidad</th>
+                                    <th>Unidades</th>
+                                    <th>Litros Totales</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for v in metricas_viscosidad %}
+                                <tr>
+                                    <td><span class="badge" style="background: #34495e;">{{ v[0] }}</span></td>
+                                    <td><b>{{ v[2] }} u.</b></td>
+                                    <td><span class="stock-ok">{{ "%.1f"|format(v[1]) }} Lts</span></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="3" style="text-align: center; color: #b0b9c6;">Sin datos de ventas.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN RESUMEN CIERRE MENSUAL -->
+                <div class="card" style="border-left: 5px solid #2ecc71;">
+                    <h3 style="color: #2ecc71; margin-top: 0;">📅 Resumen de Cierre Mensual</h3>
+                    <p style="color: #b0b9c6;">Consolidado automático de ventas al cierre de cada periodo mensual.</p>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Periodo (Año-Mes)</th>
+                                <th>Operaciones</th>
+                                <th>Litros Salidos</th>
+                                <th>Facturación Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rm in resumen_mensual %}
+                            <tr>
+                                <td><b>📆 {{ rm[0] }}</b></td>
+                                <td><b>{{ rm[1] }} ventas</b></td>
+                                <td><b style="color: #3498db;">{{ "%.1f"|format(rm[2]) }} Lts</b></td>
+                                <td><b style="color: #2ecc71;">${{ "%.2f"|format(rm[3]) }}</b></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" style="text-align: center; color: #b0b9c6;">No hay cierres mensuales registrados aún.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- CARGAR PRODUCTO -->
+            <!-- CARGAR PRODUCTO (CON CÁMARA INTEGRADAS) -->
             <div id="cargar" class="tab-content">
                 <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
                 <div class="card">
                     <h2>➕ Cargar Nuevo Lubricante</h2>
+                    
+                    <button type="button" class="btn-submit" onclick="iniciarCamara('reader-cargar', 'input-codigo-cargar')" style="background: #3498db; margin-bottom: 15px; max-width: 320px;">📷 Escanear Código de Barras</button>
+                    <div id="reader-cargar" style="width: 100%; max-width: 500px; border-radius: 10px; overflow: hidden; margin-bottom: 15px;"></div>
+
                     <form action="/agregar" method="POST">
                         <label>Marca:</label>
                         <select name="marca" required>
@@ -525,8 +626,8 @@
                             <option value="OTRA">Otra Marca</option>
                         </select>
 
-                        <label>Código de Barras (Opcional):</label>
-                        <input type="text" name="codigo_barras" placeholder="Ej: 1000000779">
+                        <label>Código de Barras:</label>
+                        <input type="text" id="input-codigo-cargar" name="codigo_barras" placeholder="Escanee con la cámara o escriba aquí...">
 
                         <label>Nombre / Línea de Producto:</label>
                         <input type="text" name="nombre" required>
@@ -555,6 +656,74 @@
                         <input type="number" name="stock" value="12" required>
 
                         <button type="submit" class="btn-submit">Guardar Producto</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- GESTIÓN DE LISTAS E INVENTARIO NUEVO -->
+            <div id="gestion_listas" class="tab-content">
+                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
+                
+                <div class="card" style="margin-bottom: 25px;">
+                    <h2 style="color: #2ecc71;">⚙️ Gestión de Listas e Inventario</h2>
+                    <p style="color: #b0b9c6;">Opciones avanzadas para reiniciar conteos o reemplazar el catálogo oficial de precios y productos.</p>
+                </div>
+
+                <!-- SECCIÓN REINICIAR INVENTARIO -->
+                <div class="card" style="margin-bottom: 25px; border-left: 5px solid #e74c3c;">
+                    <h3 style="color: #e74c3c; margin-top: 0;">🔄 Iniciar Nuevo Inventario (Poner Stock a Cero)</h3>
+                    <p style="color: #b0b9c6;">Usa esta opción cuando comience un nuevo conteo general. Mantiene todos los productos y precios cargados, pero restablece el stock registrado a 0 para volver a contar de cero.</p>
+                    <form action="/iniciar_inventario_auditoria" method="POST" onsubmit="return confirm('⚠️ ¿Estás seguro de que deseas poner el stock de TODOS los productos a 0?')">
+                        <button type="submit" class="btn-submit btn-danger" style="max-width: 320px;">🔄 Blanquear Stock a Cero</button>
+                    </form>
+                </div>
+                 <!-- SECCIÓN PRODUCTOS DADOS DE BAJA / PAPELERA -->
+                <div class="card" style="margin-top: 25px; border-left: 5px solid #e67e22;">
+                <h3 style="color: #e67e22; margin-top: 0;">📦 Papelera de Productos (Dados de Baja)</h3>
+                <p style="color: #b0b9c6;">Estos productos no se muestran en el mostrador ni en la venta directa. Podés restaurarlos si te equivocaste o eliminarlos definitivamente para no ocupar espacio.</p>
+
+                <table>
+                <thead>
+                <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Viscosidad</th>
+                <th>Acciones</th>
+                </tr>
+             </thead>
+                <tbody>
+                {% for p in productos_archivados %}
+                <tr>
+                <td><code>{{ p[1] }}</code></td>
+                <td><b>{{ p[2] }}</b></td>
+                <td>{{ p[3] }}</td>
+                <td style="display: flex; gap: 8px;">
+                    <!-- BOTÓN RESTAURAR (🟢 Vuelve al mostrador) -->
+                    <form action="/restaurar_producto/{{ p[0] }}" method="POST">
+                        <button type="submit" class="btn-submit" style="background: #27ae60; padding: 6px 12px; font-size: 13px; margin: 0; width: auto;">🟢 Restaurar</button>
+                    </form>
+
+                    <!-- BOTÓN ELIMINACIÓN DEFINITIVA (🗑️ Libera espacio) -->
+                    <form action="/eliminar_definitivo/{{ p[0] }}" method="POST" onsubmit="return confirm('⚠️ ¿ELIMINAR DEFINITIVAMENTE? Esta acción borra el producto para siempre.')">
+                        <button type="submit" class="btn-submit btn-danger" style="padding: 6px 12px; font-size: 13px; margin: 0; width: auto;">🗑️ Borrar Definitivo</button>
+                    </form>
+                    </td>
+                     </tr>
+                {% else %}
+                <tr><td colspan="4" style="text-align: center; color: #b0b9c6;">No hay productos dados de baja en la papelera.</td></tr>
+                {% endfor %}
+                </tbody>
+                </table>
+                </div>
+
+                <!-- SECCIÓN REEMPLAZAR LISTAS DE PRODUCTOS -->
+                <div class="card" style="border-left: 5px solid #3498db;">
+                    <h3 style="color: #3498db; margin-top: 0;">📁 Reemplazar / Importar Lista de Productos</h3>
+                    <p style="color: #b0b9c6;">Carga un archivo Excel (.xlsx) o CSV con el nuevo listado de precios y productos para reemplazar o actualizar la base de datos actual.</p>
+                    <form action="/importar_lista" method="POST" enctype="multipart/form-data">
+                        <label>Seleccionar Archivo (.csv / .xlsx):</label>
+                        <input type="file" name="archivo_lista" accept=".csv, .xlsx" required style="padding: 8px;">
+                        <button type="submit" class="btn-submit" style="background: #3498db; max-width: 320px;">📤 Subir y Reemplazar Lista</button>
                     </form>
                 </div>
             </div>
@@ -656,7 +825,9 @@
                     seleccionarPorCodigo(decodedText, selectReservaControl);
                 } else {
                     document.getElementById(targetInputOrSelect).value = decodedText;
-                    buscarProductoPorCodigo(decodedText);
+                    if (targetInputOrSelect === 'input-codigo-scanner') {
+                        buscarProductoPorCodigo(decodedText);
+                    }
                 }
             });
         }
@@ -673,29 +844,29 @@
                 alert(`⚠️ No se encontró ningún producto asociado al código: ${codigo}`);
             }
         }
-function generarComprobante(event) {
-    event.preventDefault();
-    const select = document.getElementById("select-venta");
-    const selectedOption = select.options[select.selectedIndex];
-    
-    if (!selectedOption.value) return;
 
-    const nombre = selectedOption.dataset.nombre || selectedOption.text;
-    const cantidad = parseInt(document.getElementById("venta-cantidad").value);
-    const precioUnitario = parseFloat(selectedOption.dataset.precio || 0);
-    const total = cantidad * precioUnitario;
+        function generarComprobante(event) {
+            event.preventDefault();
+            const select = document.getElementById("select-venta");
+            const selectedOption = select.options[select.selectedIndex];
+            
+            if (!selectedOption.value) return;
 
-    // FORMATO FORZADO A 24 HORAS (HH:MM:SS)
-    const fechaHora = new Date().toLocaleString('es-AR', { hour12: false });
+            const nombre = selectedOption.dataset.nombre || selectedOption.text;
+            const cantidad = parseInt(document.getElementById("venta-cantidad").value);
+            const precioUnitario = parseFloat(selectedOption.dataset.precio || 0);
+            const total = cantidad * precioUnitario;
 
-    document.getElementById("ticket-fecha").textContent = fechaHora;
-    document.getElementById("ticket-prod").textContent = nombre;
-    document.getElementById("ticket-cant").textContent = `${cantidad} u.`;
-    document.getElementById("ticket-precio").textContent = `$${precioUnitario.toFixed(2)}`;
-    document.getElementById("ticket-total-val").textContent = `$${total.toFixed(2)}`;
+            const fechaHora = new Date().toLocaleString('es-AR', { hour12: false });
 
-    document.getElementById("modal-ticket").style.display = "flex";
-}
+            document.getElementById("ticket-fecha").textContent = fechaHora;
+            document.getElementById("ticket-prod").textContent = nombre;
+            document.getElementById("ticket-cant").textContent = `${cantidad} u.`;
+            document.getElementById("ticket-precio").textContent = `$${precioUnitario.toFixed(2)}`;
+            document.getElementById("ticket-total-val").textContent = `$${total.toFixed(2)}`;
+
+            document.getElementById("modal-ticket").style.display = "flex";
+        }
 
         function confirmarVentasForm() {
             document.getElementById("form-venta").submit();
@@ -778,14 +949,12 @@ function generarComprobante(event) {
                     let parser = new DOMParser();
                     let doc = parser.parseFromString(html, 'text/html');
                     
-                    // Actualiza la tabla de reservas si hay solicitudes nuevas
                     let nuevaTablaRes = doc.querySelector("#reservas table");
                     let tablaActualRes = document.querySelector("#reservas table");
                     if (nuevaTablaRes && tablaActualRes) {
                         tablaActualRes.innerHTML = nuevaTablaRes.innerHTML;
                     }
 
-                    // Actualiza el contador de la tarjeta en el inicio
                     let nuevoCount = doc.querySelector("#count-reservas-dash");
                     let actualCount = document.querySelector("#count-reservas-dash");
                     if (nuevoCount && actualCount) {
