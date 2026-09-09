@@ -3,17 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ÓLEOS MINERALES SRL - Sistema de Gestión</title>
-    <!-- TIPOGRAFÍA MODERNIZADA -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>{% if perfil == 'admin' %}🟢 ÓLEOS MINERALES - Administrador{% else %}🔵 ÓLEOS MINERALES - Mostrador{% endif %}</title>
+    <!-- FAVICON DINÁMICO SEGÚN PERFIL -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icono_administrador.ico' if perfil == 'admin' else 'icono_mostrador.ico') }}">
+    <!-- TIPOGRAFÍA PREMIUM EJECUTIVA (PLUS JAKARTA SANS + INTER) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- LIBRERÍA LECTORA DE CÓDIGOS DE BARRA -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <!-- LIBRERÍA PARA BUSCADORES INTELIGENTES EN DESPLEGABLES -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <!-- LIBRERÍA PARA DESCARGA DE PDF DIRECTA -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
-        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; background: #161922; color: #e1e6ed; font-size: 16px; }
+        body { 
+            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: #11141c; 
+            color: #e2e8f0; 
+            font-size: 15.5px; 
+            letter-spacing: -0.012em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4, .dash-title, .sidebar-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.025em;
+            font-weight: 700;
+        }
         
         .app-layout { 
             display: flex; 
@@ -27,11 +49,11 @@
         .sidebar { 
             width: 310px; 
             min-width: 310px; 
-            background: #202430; 
+            background: #1c212d; 
             padding: 22px; 
             border-radius: 14px; 
-            border: 1px solid #2f3648; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5); 
+            border: 1px solid #2a3346; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); 
             box-sizing: border-box; 
             text-align: center; 
             display: flex; 
@@ -39,57 +61,76 @@
         }
         
         .sidebar-logo { width: 100%; max-width: 190px; border-radius: 10px; background: #ffffff; padding: 8px; margin: 0 auto 12px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .sidebar-title { font-size: 19px; font-weight: 700; color: #2ecc71; margin: 2px 0 8px 0; letter-spacing: 0.5px; }
+        .sidebar-title { font-size: 17px; font-weight: 800; color: #2ecc71; margin: 2px 0 8px 0; letter-spacing: 0.6px; text-transform: uppercase; }
         
         .sidebar-brands { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
         .brand-badge { height: 28px; object-fit: contain; background: #ffffff; padding: 4px 8px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        .sidebar-clock { background: #161922; border: 2px solid #2ecc71; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
-        #reloj-hora { font-size: 26px; font-weight: 700; color: #2ecc71; letter-spacing: 1px; }
-        #reloj-fecha { font-size: 12px; color: #b0b9c6; text-transform: capitalize; margin-top: 2px; }
+        .sidebar-clock { 
+            background: #131620; 
+            border: 1.5px solid rgba(46, 204, 113, 0.45); 
+            padding: 12px 10px; 
+            border-radius: 10px; 
+            margin-bottom: 18px; 
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.4);
+        }
+        #reloj-hora { 
+            font-size: 26px; 
+            font-weight: 800; 
+            color: #2ecc71; 
+            letter-spacing: 0.5px; 
+            font-variant-numeric: tabular-nums;
+        }
+        #reloj-fecha { 
+            font-size: 12px; 
+            color: #94a3b8; 
+            font-weight: 600;
+            text-transform: capitalize; 
+            margin-top: 3px; 
+        }
 
-        .btn-home-return { background: #282d3b; color: #2ecc71; border: 2px solid #2ecc71; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 15px; }
+        .btn-home-return { 
+            background: #242b3a; 
+            color: #2ecc71; 
+            border: 1.5px solid #2ecc71; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 14px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            width: 100%; 
+            margin-bottom: 15px; 
+            font-family: inherit;
+        }
         .btn-home-return:hover { background: #2ecc71; color: #111; }
 
-        .status-badge { background: #161922; border: 1px solid #2ecc71; padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .status-badge { background: #131620; border: 1px solid #2ecc71; padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .status-dot { height: 10px; width: 10px; background: #2ecc71; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #2ecc71; }
 
         .main-panel { 
             flex: 1; 
             width: calc(100% - 335px); 
             min-width: 0; 
-            box-sizing: border-box;
+            box-sizing: border-box; 
         }
 
         .tab-content { display: none; width: 100%; }
         .tab-content.active { display: block; }
 
         .btn-back-header {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #282d3b;
-            color: #2ecc71;
-            border: 2px solid #2ecc71;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-bottom: 15px;
+            display: none !important;
         }
-        .btn-back-header:hover { background: #2ecc71; color: #111; transform: translateX(-3px); }
 
         .home-dashboard { 
-            background: linear-gradient(rgba(17, 20, 26, 0.75), rgba(17, 20, 26, 0.75)), url("{{ url_for('static', filename='estanteria.jpeg') }}");
+            background: linear-gradient(rgba(14, 17, 24, 0.82), rgba(14, 17, 24, 0.82)), url("{{ url_for('static', filename='estanteria.jpeg') }}");
             background-size: cover;
             background-position: center;
             width: 100%;
             min-height: 620px;
             border-radius: 16px; 
-            border: 2px solid #2ecc71; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.7); 
+            border: 1.5px solid #2ecc71; 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.7); 
             padding: 40px;
             box-sizing: border-box;
             display: flex;
@@ -98,8 +139,21 @@
         }
 
         .dashboard-header { text-align: center; margin-bottom: 40px; }
-        .dashboard-header h2 { font-size: 32px; color: #2ecc71; margin: 0; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
-        .dashboard-header p { font-size: 18px; color: #e1e6ed; margin-top: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .dashboard-header h2 { 
+            font-size: 30px; 
+            font-weight: 800; 
+            color: #2ecc71; 
+            margin: 0; 
+            letter-spacing: -0.025em; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.85); 
+        }
+        .dashboard-header p { 
+            font-size: 15px; 
+            color: #cbd5e1; 
+            margin-top: 6px; 
+            font-weight: 500; 
+            text-shadow: 0 2px 6px rgba(0,0,0,0.8); 
+        }
 
         .dashboard-grid { 
             display: grid; 
@@ -110,58 +164,103 @@
         }
 
         .dash-card { 
-            background: rgba(32, 36, 48, 0.85); 
-            border: 2px solid #3a4153; 
-            border-radius: 12px; 
-            padding: 25px 20px; 
+            background: rgba(26, 32, 45, 0.88); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 14px; 
+            padding: 26px 20px; 
             text-align: center; 
             cursor: pointer; 
-            transition: all 0.25s ease; 
-            backdrop-filter: blur(6px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1); 
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
         
         .dash-card:hover { 
             border-color: #2ecc71; 
-            transform: translateY(-5px); 
-            background: rgba(46, 204, 113, 0.9); 
-            color: #111; 
+            transform: translateY(-4px); 
+            background: rgba(32, 41, 58, 0.95); 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.6), 0 0 20px rgba(46, 204, 113, 0.2);
         }
         
-        .dash-card:hover .dash-icon { transform: scale(1.15); color: #111; }
-        .dash-card:hover .dash-title { color: #111; }
+        .dash-card:hover .dash-icon { transform: scale(1.1); color: #2ecc71; }
+        .dash-card:hover .dash-title { color: #ffffff; }
 
-        .dash-icon { font-size: 38px; margin-bottom: 10px; transition: 0.2s; color: #2ecc71; }
-        .dash-title { font-size: 18px; font-weight: 700; color: #ffffff; }
+        .dash-icon { font-size: 34px; margin-bottom: 12px; transition: 0.2s; color: #2ecc71; }
+        .dash-title { font-size: 16px; font-weight: 700; color: #f8fafc; letter-spacing: -0.01em; }
 
-        .card { background: #202430; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid #2f3648; }
-        label { display: block; margin-top: 15px; font-weight: 600; color: #b0b9c6; }
-        input, select { padding: 12px; margin-top: 6px; width: 100%; box-sizing: border-box; background: #161922; color: #fff; border: 2px solid #3a4153; border-radius: 8px; font-size: 16px; }
+        .card { background: #1c212d; padding: 25px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.35); border: 1px solid #2a3346; }
+        label { display: block; margin-top: 15px; font-weight: 600; color: #94a3b8; font-size: 14px; }
+        input, select { 
+            padding: 12px 14px; 
+            margin-top: 6px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            background: #131620; 
+            color: #fff; 
+            border: 1.5px solid #333d52; 
+            border-radius: 8px; 
+            font-size: 15px; 
+            font-family: inherit;
+        }
         
-        .search-box { background: #161922; border: 2px solid #2ecc71; padding: 15px; font-size: 18px; border-radius: 8px; margin-bottom: 20px; color: #2ecc71; font-weight: bold; }
+        .search-box { 
+            background: #131620; 
+            border: 2px solid #2ecc71; 
+            padding: 13px 16px; 
+            font-size: 16px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            color: #2ecc71; 
+            font-weight: 600; 
+            font-family: inherit;
+        }
 
-        .btn-submit { background: #27ae60; color: white; border: none; font-size: 18px; font-weight: 600; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.2s; }
+        .btn-submit { 
+            background: #27ae60; 
+            color: white; 
+            border: none; 
+            font-size: 15.5px; 
+            font-weight: 700; 
+            letter-spacing: -0.01em; 
+            padding: 14px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            width: 100%; 
+            margin-top: 20px; 
+            transition: 0.2s; 
+            font-family: inherit;
+        }
         .btn-submit:hover { background: #219653; }
         .btn-vender { background: #e67e22; }
         .btn-danger { background: #e74c3c; }
         .btn-danger:hover { background: #c0392b; }
 
-        table { width: 100%; border-collapse: collapse; background: #202430; border-radius: 10px; overflow: hidden; font-size: 16px; }
-        th, td { padding: 14px; border-bottom: 1px solid #2f3648; text-align: left; }
-        th { background: #161922; color: #2ecc71; font-size: 17px; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: #1c212d; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            font-size: 14.5px; 
+            font-variant-numeric: tabular-nums;
+        }
+        th, td { padding: 12px 14px; border-bottom: 1px solid #2a3346; text-align: left; }
+        th { background: #131620; color: #2ecc71; font-size: 13.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
         
-        .row-reservado { background-color: #1a1e27 !important; color: #7f8c8d !important; }
+        .row-reservado { background-color: #161922 !important; color: #94a3b8 !important; }
         .row-reservado td { border-bottom: 1px dashed #f39c12; }
 
-        .clickable-row:hover { background-color: #282d3b !important; cursor: pointer; }
+        .clickable-row:hover { background-color: #242c3d !important; cursor: pointer; }
 
-        .badge { background: #27ae60; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; display: inline-block; max-width: 100%; white-space: normal; line-height: 1.3; }
-        .badge-reserva { background: #f39c12; color: #111; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 13px; }
-        .bulto-tag { background: #3498db; color: white; padding: 3px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; }
+        .badge { background: #27ae60; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 600; display: inline-block; max-width: 100%; white-space: normal; line-height: 1.3; font-size: 14px; }
+        .badge-reserva { background: #f39c12; color: #111; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+        .bulto-tag { background: #3498db; color: white; padding: 2px 7px; border-radius: 4px; font-size: 13px; font-weight: 600; }
         .stock-ok { color: #2ecc71; font-weight: 700; }
         .stock-low { color: #e74c3c; font-weight: 700; }
 
@@ -172,11 +271,11 @@
         .btn-reject:hover { background: #c0392b; }
 
         /* ESTILOS TOM-SELECT ALTO CONTRASTE */
-        .ts-control { background-color: #161922 !important; color: #ffffff !important; border: 2px solid #2ecc71 !important; border-radius: 8px !important; padding: 12px !important; font-size: 16px !important; font-weight: 600 !important; }
-        .ts-control input { color: #ffffff !important; font-size: 16px !important; }
-        .ts-dropdown { background-color: #202430 !important; color: #ffffff !important; border: 2px solid #2ecc71 !important; border-radius: 8px !important; font-size: 16px !important; }
-        .ts-dropdown .option { padding: 12px 15px !important; color: #ffffff !important; border-bottom: 1px solid #2f3648 !important; }
-        .ts-dropdown .active { background-color: #3498db !important; color: #ffffff !important; font-weight: 700 !important; }
+        .ts-control { background-color: #131620 !important; color: #ffffff !important; border: 1.5px solid #2ecc71 !important; border-radius: 8px !important; padding: 12px 14px !important; font-size: 15px !important; font-weight: 600 !important; font-family: inherit !important; }
+        .ts-control input { color: #ffffff !important; font-size: 15px !important; font-family: inherit !important; }
+        .ts-dropdown { background-color: #1c212d !important; color: #ffffff !important; border: 1.5px solid #2ecc71 !important; border-radius: 8px !important; font-size: 15px !important; font-family: inherit !important; }
+        .ts-dropdown .option { padding: 12px 14px !important; color: #ffffff !important; border-bottom: 1px solid #2a3346 !important; }
+        .ts-dropdown .active { background-color: #2563eb !important; color: #ffffff !important; font-weight: 700 !important; }
 
         /* MODALES Y COMPROBANTE */
         .modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
@@ -188,10 +287,104 @@
         .ticket-row { display: flex; justify-content: space-between; margin: 8px 0; }
         .ticket-total { font-size: 22px; font-weight: bold; border-top: 2px solid #000; padding-top: 10px; margin-top: 15px; text-align: right; }
 
+        /* CLASES PARA ALERTAS Y MENSAJES */
+        .alert-card {
+            margin-bottom: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        .alert-error {
+            background: #e74c3c;
+            color: white;
+            border: 2px solid #c0392b;
+        }
+        .alert-success {
+            background: #2ecc71;
+            color: #111;
+            border: 2px solid #27ae60;
+        }
+
+        /* Zoom digital visual para obligar al usuario a alejar la cámara y lograr autofoco en iPhone */
+        #reader video, #reader-venta video, #reader-reserva video, #reader-cargar video {
+            transform: scale(1.35) !important;
+            transform-origin: center center;
+        }
+
         @media (max-width: 900px) {
             .app-layout { flex-direction: column; }
             .sidebar { width: 100%; box-sizing: border-box; }
             .main-panel { width: 100%; }
+        }
+        /* Diseño horizontal para el mostrador (ocupa 100% de ancho) */
+        body.mostrador-layout .app-layout {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+        }
+        body.mostrador-layout .main-panel {
+            width: 100%;
+        }
+        body.mostrador-layout .sidebar {
+            width: 100%;
+            min-width: 100%;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        body.mostrador-layout .sidebar-logo {
+            width: 45px;
+            height: 45px;
+            margin: 0;
+            padding: 3px;
+        }
+        body.mostrador-layout .sidebar-title {
+            font-size: 16px;
+            margin: 0;
+        }
+        body.mostrador-layout .sidebar-brands {
+            margin: 0;
+            gap: 5px;
+        }
+        body.mostrador-layout .brand-badge {
+            height: 22px;
+            padding: 2px 4px;
+        }
+        body.mostrador-layout .sidebar-clock {
+            margin: 0;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        body.mostrador-layout #reloj-hora {
+            font-size: 16px;
+        }
+        body.mostrador-layout #reloj-fecha {
+            font-size: 10px;
+            margin-top: 0;
+        }
+        body.mostrador-layout .btn-home-return {
+            margin: 0;
+            padding: 8px 12px;
+            width: auto;
+        }
+        body.mostrador-layout .status-badge {
+            padding: 8px 12px;
+        }
+        /* Ajustes de tabla compacta para que quepa en el ancho de pantalla de PC */
+        body.mostrador-layout table {
+            font-size: 15px;
+        }
+        body.mostrador-layout th,
+        body.mostrador-layout td {
+            padding: 10px 8px;
+        }
+        body.mostrador-layout .badge {
+            padding: 4px 8px;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -200,7 +393,7 @@
     <div class="app-layout">
         <!-- PANEL IZQUIERDO (SIDEBAR LIMPIA) -->
         <div class="sidebar">
-            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Óleos Minerales SRL" class="sidebar-logo">
+            <img src="{{ url_for('static', filename='logo.jpg' if perfil == 'admin' else 'logo_mostrador_azul.jpg') }}" alt="Óleos Minerales SRL" class="sidebar-logo">
             <h1 class="sidebar-title">ÓLEOS MINERALES SRL</h1>
             
             <div class="sidebar-brands">
@@ -215,15 +408,46 @@
 
             <button class="btn-home-return" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
 
-            <!-- ESTADO DEL SISTEMA -->
-            <div class="status-badge">
-                <span class="status-dot"></span>
-                <span style="font-size: 13px; color: #2ecc71; font-weight: bold;">Sistema En Línea</span>
+            <!-- PERFIL DEL SISTEMA Y BOTÓN DE SINCRONIZACIÓN -->
+            {% if perfil == 'admin' %}
+            <div style="background: #161922; border: 2px solid #2ecc71; border-radius: 8px; padding: 10px; margin-top: 15px; text-align: center;">
+                <div style="color: #2ecc71; font-size: 13px; font-weight: bold; margin-bottom: 6px;">👑 Modo Administrador</div>
+                <button type="button" onclick="abrirModalSync()" style="background: #3498db; color: #fff; border: none; border-radius: 6px; padding: 8px 12px; font-size: 12px; font-weight: bold; cursor: pointer; width: 100%;">🔄 Enviar al Mostrador</button>
             </div>
+            {% else %}
+            <div style="background: #161922; border: 2px solid #3498db; border-radius: 8px; padding: 10px; margin-top: 15px; text-align: center;">
+                <div style="color: #3498db; font-size: 13px; font-weight: bold; margin-bottom: 6px;">🖥️ Mostrador (Solo Consulta)</div>
+                <button type="button" onclick="abrirModalPinAdmin()" style="background: #2f3648; color: #b0b9c6; border: 1px solid #485460; border-radius: 6px; padding: 6px 10px; font-size: 11px; cursor: pointer; width: 100%;">🔓 Acceso Administrador</button>
+            </div>
+            {% endif %}
+
+            <!-- ESTADO DEL SISTEMA -->
+            <div class="status-badge" style="margin-top: 15px;">
+                <span class="status-dot"></span>
+                <span style="font-size: 12px; color: #2ecc71; font-weight: bold;">En Línea ({% if ip_local %}{{ ip_local }}{% else %}Local{% endif %})</span>
+            </div>
+
         </div>
 
         <!-- PANEL PRINCIPAL DERECHO -->
         <div class="main-panel">
+            <!-- ALERTA DE ERRORES DE BASE DE DATOS -->
+            {% if db_error %}
+            <div class="card alert-card alert-error">
+                ⚠️ ERROR DE BASE DE DATOS: {{ db_error }}
+            </div>
+            {% endif %}
+
+            <!-- MENSAJES DE NOTIFICACIÓN FLASH -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="card alert-card {% if category == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
 
             <!-- INICIO CON FONDO DE ESTANTERÍA Y TARJETAS DISTRIBUIDAS -->
             <div id="inicio" class="tab-content active">
@@ -249,6 +473,7 @@
                             <div class="dash-title">Reservas (<span id="count-reservas-dash">{{ reservas_pendientes|length }}</span>)</div>
                         </div>
 
+                        {% if perfil == 'admin' %}
                         <div class="dash-card" onclick="openTab('venta')">
                             <div class="dash-icon">🛒</div>
                             <div class="dash-title">Venta Directa</div>
@@ -258,21 +483,24 @@
                             <div class="dash-icon">➕</div>
                             <div class="dash-title">Cargar Producto</div>
                         </div>
+                        {% endif %}
 
+                        <div class="dash-card {% if productos_faltantes|length > 0 %}dash-card-alert{% endif %}" onclick="openTab('reposicion')" style="border-left: 4px solid #e74c3c;">
+                            <div class="dash-icon">⚠️</div>
+                            <div class="dash-title">Reposición ({{ productos_faltantes|length }})</div>
+                        </div>
+
+                        {% if perfil == 'admin' %}
                         <div class="dash-card" onclick="openTab('gestion_listas')">
                             <div class="dash-icon">⚙️</div>
-                            <div class="dash-title">Gestión de Listas</div>
+                            <div class="dash-title">Gestión y Depósito</div>
                         </div>
 
                         <div class="dash-card" onclick="openTab('metricas')">
                             <div class="dash-icon">📊</div>
                             <div class="dash-title">Métricas</div>
                         </div>
-
-                        <div class="dash-card" onclick="openTab('deposito')">
-                            <div class="dash-icon">🏚️</div>
-                            <div class="dash-title">Depósito 60D</div>
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -287,7 +515,8 @@
 
                 <input type="text" id="buscador" class="search-box" onkeyup="filtrarTabla()" placeholder="🔍 Buscar por Producto, Código, Marca o Viscosidad...">
 
-                <table id="tabla-productos">
+                <div style="overflow-x: auto; width: 100%;">
+                    <table id="tabla-productos">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -297,7 +526,10 @@
                             <th>Bulto Cerrado</th>
                             <th>P. Venta Bulto</th>
                             <th>Stock Actual</th>
+                            {% if perfil == 'admin' %}
                             <th>Ajustar Stock</th>
+                            <th>Acciones</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -305,7 +537,7 @@
                         <tr class="clickable-row {% if p[10] > 0 %}row-reservado{% endif %}" 
                             data-id="{{ p[0] }}"
                             data-codigo="{{ p[1] }}" 
-                            data-nombre="{{ p[2] }}" 
+                            data-nombre="{{ p[2]|forceescape }}" 
                             data-viscosidad="{{ p[3] }}" 
                             data-presentacion="{{ p[4] }}" 
                             data-bulto="{{ p[5] }}" 
@@ -322,31 +554,61 @@
                                 {% endif %}
                             </td>
                             <td><b>{{ p[3] }}</b></td>
-                            <td><span class="bulto-tag">x{{ p[5] }} unid.</span> ({{ p[4] }})</td>
+                            {% set pres_upper = p[4]|upper %}
+                            {% set es_individual = 'BALDE' in pres_upper or 'TAMBOR' in pres_upper or 'TBR' in pres_upper or 'CONTENEDOR' in pres_upper or 'GRANEL' in pres_upper %}
+                            {% set bulto_render = 1 if es_individual else p[5] %}
+                            <td>{{ p[4] }} {% if bulto_render > 1 %}<span style="font-size:12px;color:#b0b9c6;">(x{{ p[5] }} u.)</span>{% endif %}</td>
                             <td><b>${{ "%.2f"|format(p[7]) }}</b></td>
                             <td>
-                                {% if p[8] <= 3 %}
-                                    <span class="stock-low">⚠️ {{ p[8] }} unid.</span>
+                                {% set stock_total = p[8] %}
+                                {% if bulto_render > 1 %}
+                                    {% set cajas = (stock_total / bulto_render)|int %}
+                                    {% set sueltas = stock_total % bulto_render %}
+                                    {% if cajas > 0 and sueltas > 0 %}
+                                        {% set stock_visual = "" ~ cajas ~ " cajas + " ~ sueltas ~ " unids. (" ~ stock_total ~ " unids.)" %}
+                                    {% elif cajas > 0 %}
+                                        {% set stock_visual = "" ~ cajas ~ " cajas (" ~ stock_total ~ " unids.)" %}
+                                    {% else %}
+                                        {% set stock_visual = "" ~ sueltas ~ " unids." %}
+                                    {% endif %}
                                 {% else %}
-                                    <span class="stock-ok">{{ p[8] }} unid.</span>
+                                    {% set stock_visual = "" ~ stock_total ~ " unids." %}
+                                {% endif %}
+
+                                {% if stock_total <= 5 %}
+                                    <span class="stock-low">⚠️ {{ stock_visual }}</span>
+                                {% else %}
+                                    <span class="stock-ok">{{ stock_visual }}</span>
                                 {% endif %}
                             </td>
-                            <td onclick="event.stopPropagation();">
-                                <form action="/editar_stock" method="POST" style="display: flex; gap: 5px;">
-                                    <input type="hidden" name="id_producto" value="{{ p[0] }}">
-                                    <input type="number" name="nuevo_stock" value="{{ p[8] }}" style="width: 80px; padding: 5px; margin: 0;">
-                                    <button type="submit" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">💾 Ok</button>
-                                </form>
+                            {% if perfil == 'admin' %}
+                            <td onclick="event.stopPropagation();" style="white-space: nowrap; text-align: center; width: 225px;">
+                                <div style="display: inline-flex; align-items: center; gap: 4px; justify-content: center;">
+                                    {% if bulto_render > 1 %}
+                                        {% set cajas_actual = (p[8] / bulto_render)|int %}
+                                        {% set sueltas_actual = p[8] % bulto_render %}
+                                        <input type="number" id="input-cajas-{{ p[0] }}" value="{{ cajas_actual }}" min="0" style="width: 44px; padding: 4px; text-align: center; margin: 0; font-size: 13px; background: #161922; border: 1px solid #2f3648; color: #fff; border-radius: 4px;" title="Cajas">
+                                        <span style="color: #b0b9c6; font-size: 12px; font-weight: 500;">cajas</span>
+                                        <input type="number" id="input-sueltas-{{ p[0] }}" value="{{ sueltas_actual }}" min="0" style="width: 44px; padding: 4px; text-align: center; margin: 0; font-size: 13px; background: #161922; border: 1px solid #2f3648; color: #fff; border-radius: 4px;" title="Unidades sueltas">
+                                        <span style="color: #b0b9c6; font-size: 12px; font-weight: 500;">unids.</span>
+                                    {% else %}
+                                        <input type="number" id="input-sueltas-{{ p[0] }}" value="{{ p[8] }}" min="0" style="width: 65px; padding: 4px; text-align: center; margin: 0; font-size: 13px; background: #161922; border: 1px solid #2f3648; color: #fff; border-radius: 4px;" title="Unidades totales">
+                                        <span style="color: #b0b9c6; font-size: 12px; font-weight: 500;">unids.</span>
+                                    {% endif %}
+                                    <button onclick="guardarAjusteCajasUnidades({{ p[0] }}, {{ bulto_render }})" style="background: #3498db; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">Ok</button>
+                                </div>
                             </td>
                             <td onclick="event.stopPropagation();">
-                             <form action="/dar_de_baja/{{ p[0] }}" method="POST" onsubmit="return confirm('⚠️ ¿Deseas dar de baja el producto {{ p[2] }}?')">
+                             <form action="/dar_de_baja/{{ p[0] }}" method="POST" onsubmit="return confirm('⚠️ ¿Deseas dar de baja este producto?')">
                            <button type="submit" class="btn-submit btn-danger" style="padding: 6px 10px; font-size: 13px; margin: 0; width: auto;">🗑️ Dar de baja</button>
                          </form>
                             </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <!-- ESCANEAR -->
@@ -354,11 +616,23 @@
                 <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
                 <div class="card" style="text-align: center;">
                     <h2>📷 Escáner de Código de Barras (Control / Cierre)</h2>
-                    <p style="color: #b0b9c6;">Apunta la cámara del celular al código del producto o digita el código con lector físico.</p>
+                    <p style="color: #b0b9c6; margin-bottom: 20px;">Apunta la cámara del celular al código del producto o digita el código con lector físico.</p>
+
+                    <!-- CONTROL DE MODO DE CONTEO (MANUAL O RÁPIDO +1) -->
+                    <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; background: #161922; padding: 12px 20px; border-radius: 8px; border: 1px solid #3a4153; max-width: 500px; margin-left: auto; margin-right: auto; flex-wrap: wrap;">
+                        <span style="font-weight: bold; color: #b0b9c6; font-size: 15px;">Modo de Conteo:</span>
+                        <label style="display: inline-flex; align-items: center; cursor: pointer; margin-top: 0; color: #fff; font-size: 15px;">
+                            <input type="radio" name="modo-conteo-inv" value="manual" checked style="width: auto; margin-right: 6px; cursor: pointer;"> Manual (Ingresar cantidad)
+                        </label>
+                        <label style="display: inline-flex; align-items: center; cursor: pointer; margin-top: 0; color: #fff; font-size: 15px; margin-left: 10px;">
+                            <input type="radio" name="modo-conteo-inv" value="rapido" style="width: auto; margin-right: 6px; cursor: pointer;"> Rápido (Suma +1 por escaneo)
+                        </label>
+                    </div>
 
                     <button type="button" class="btn-submit" onclick="iniciarCamara('reader', 'input-codigo-scanner')" style="background: #3498db; margin-bottom: 15px; max-width: 300px; margin-left: auto; margin-right: auto;">▶️ Encender Cámara</button>
                     
                     <div id="reader" style="width: 100%; max-width: 500px; margin: 0 auto; border-radius: 10px; overflow: hidden; margin-bottom: 20px;"></div>
+                    <p class="camera-tip" style="color: #f39c12; font-size: 14px; margin-top: 5px; font-weight: bold; display: none;">💡 Si no enfoca en iPhone, aleje el celular un poco (20-30 cm) y acerque el código lentamente.</p>
 
                     <input type="text" id="input-codigo-scanner" class="search-box" placeholder="O ingrese/escanee código aquí..." onchange="buscarProductoPorCodigo(this.value)">
 
@@ -367,12 +641,18 @@
                         <p id="scan-detalles" style="color: #b0b9c6;">--</p>
                         <div style="font-size: 20px; margin: 15px 0;">Stock Actual registrado: <b id="scan-stock" style="color: #3498db;">0</b> unid.</div>
 
-                        <form action="/editar_stock" method="POST">
+                        <form action="/editar_stock" method="POST" id="form-scan-stock" onsubmit="guardarStockManualAjax(event)">
                             <input type="hidden" id="scan-id-producto" name="id_producto" value="">
                             <label>Nuevo Stock Real en Estantería:</label>
                             <input type="number" id="scan-nuevo-stock" name="nuevo_stock" value="0" min="0" required style="font-size: 22px; text-align: center; font-weight: bold;">
                             <button type="submit" class="btn-submit" style="background: #27ae60;">💾 Confirmar y Guardar Stock Real</button>
                         </form>
+                    </div>
+
+                    <!-- ACCIONES DE FINALIZACIÓN PARA EL OPERARIO -->
+                    <div style="margin-top: 30px; border-top: 1px solid #2f3648; padding-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                        <a href="/exportar" class="btn-submit" style="background: #3498db; max-width: 250px; text-decoration: none; text-align: center; margin: 0; padding: 12px 20px; display: flex; align-items: center; justify-content: center; gap: 8px;">📥 Descargar Planilla (Excel)</a>
+                        <button onclick="window.print()" class="btn-submit" style="background: #9b59b6; max-width: 250px; margin: 0; padding: 12px 20px; display: flex; align-items: center; justify-content: center; gap: 8px;">🖨️ Imprimir Inventario</button>
                     </div>
                 </div>
             </div>
@@ -381,27 +661,89 @@
             <div id="venta" class="tab-content">
                 <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
                 <div class="card">
-                    <h2>🛒 Registrar Venta Rápida con Escáner</h2>
-                    
+                    <h2>🛒 Registrar Venta / Remito</h2>
+
                     <button type="button" class="btn-submit" onclick="iniciarCamara('reader-venta', 'scanner-venta')" style="background: #e67e22; margin-bottom: 15px; max-width: 300px;">📷 Escanear con Cámara</button>
                     <div id="reader-venta" style="width: 100%; max-width: 500px; border-radius: 10px; overflow: hidden; margin-bottom: 15px;"></div>
+                    <p class="camera-tip" style="color: #f39c12; font-size: 14px; margin-top: 5px; font-weight: bold; display: none;">💡 Si no enfoca en iPhone, aleje el celular un poco (20-30 cm) y acerque el código lentamente.</p>
 
-                    <form action="/vender" method="POST" id="form-venta" onsubmit="generarComprobante(event)">
+                    <!-- AGREGAR PRODUCTO AL CARRITO -->
+                    <div style="background: #161922; border-radius: 10px; padding: 18px; margin-bottom: 18px; border: 1px solid #2f3648;">
+                        <h3 style="color: #2ecc71; margin-top: 0; font-size: 16px;">➕ Agregar Producto al Remito</h3>
+
                         <label>Buscar o Escanear Producto:</label>
-                        <select id="select-venta" name="id_producto" required>
+                        <select id="select-venta" name="id_producto">
                             <option value="" disabled selected>-- Buscar por nombre, marca o viscosidad --</option>
                             {% for p in productos %}
-                                <option value="{{ p[0] }}" data-codigo="{{ p[1] }}" data-nombre="{{ p[2] }}" data-precio="{{ p[7] }}">
-                                    {{ p[2] }} | {{ p[3] }} | {{ p[4] }} - ${{ "%.2f"|format(p[7]) }} (Stock: {{ p[8] }} u.)
+                                <option value="{{ p[0] }}" data-codigo="{{ p[1] }}" data-nombre="{{ p[2] }}" data-precio="{{ p[7] }}" data-bulto="{{ p[5] }}" data-presentacion="{{ p[4] }}">
+                                    [Código: {{ p[1] }}] {{ p[2] }} | {{ p[3] }} | {{ p[4] }} - ${{ "%.2f"|format(p[7]) }} (Stock: {{ p[8] }} u.)
                                 </option>
                             {% endfor %}
                         </select>
 
-                        <label>Cantidad Vendida:</label>
-                        <input type="number" id="venta-cantidad" name="cantidad" value="1" min="1" required style="font-size: 20px; font-weight: bold;">
+                        <!-- TIPO DE VENTA: BULTO O UNIDAD -->
+                        <label style="margin-top: 15px;">Tipo de Venta:</label>
+                        <div style="display: flex; gap: 20px; background: #202430; padding: 10px 15px; border-radius: 8px; border: 1px solid #2f3648; margin-bottom: 15px;">
+                            <label style="display: inline-flex; align-items: center; cursor: pointer; margin-top: 0; color: #fff;">
+                                <input type="radio" id="tipo-bulto" name="tipo_venta_carrito" value="bulto" checked style="width: auto; margin-right: 8px; cursor: pointer;"> Caja / Bulto Cerrado
+                            </label>
+                            <label style="display: inline-flex; align-items: center; cursor: pointer; margin-top: 0; color: #fff; margin-left: 10px;">
+                                <input type="radio" id="tipo-unidad" name="tipo_venta_carrito" value="unidad" style="width: auto; margin-right: 8px; cursor: pointer;"> Unidades Sueltas (Botellas)
+                            </label>
+                        </div>
 
-                        <button type="submit" class="btn-submit btn-vender">🛒 Descontar del Stock y Emitir Ticket</button>
-                    </form>
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <label>Cantidad a Cobrar:</label>
+                                <input type="number" id="carrito-cantidad" value="1" min="1" style="font-size: 18px; font-weight: bold; padding: 10px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label>Cantidad de Regalo / Bonificada:</label>
+                                <input type="number" id="carrito-bonificada" value="0" min="0" style="font-size: 18px; font-weight: bold; padding: 10px; border: 2px dashed #f1c40f;">
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="agregarAlCarrito()" class="btn-submit" style="background: #27ae60; max-width: 280px; padding: 12px; font-size: 16px; font-weight: bold;">➕ Agregar al Remito</button>
+                    </div>
+
+                    <!-- TABLA DEL CARRITO -->
+                    <div id="carrito-contenedor" style="display: none; margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; background: #1a1e29; padding: 10px 14px; border-radius: 6px; border: 1px solid #2d3748;">
+                            <h3 style="color: #f39c12; margin: 0;">📋 Productos en este Remito</h3>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label for="fecha-remito-input" style="font-weight: bold; color: #ecf0f1; font-size: 14px;">📅 Fecha del Remito:</label>
+                                <input type="date" id="fecha-remito-input" style="padding: 6px 10px; background: #161922; border: 1px solid #3498db; border-radius: 5px; color: #fff; font-size: 14px; font-weight: bold;" title="Podés modificar la fecha si estás cargando un remito atrasado">
+                            </div>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="tabla-carrito" style="font-size: 15px;">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Regalo</th>
+                                        <th>Precio Unit.</th>
+                                        <th>Subtotal</th>
+                                        <th>Quitar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="carrito-tbody"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" style="text-align: right; font-weight: bold; color: #b0b9c6; padding: 12px 8px;">TOTAL DEL REMITO:</td>
+                                        <td style="font-weight: bold; font-size: 18px; color: #2ecc71;" id="carrito-total">$0.00</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div style="display: flex; gap: 12px; margin-top: 15px; flex-wrap: wrap;">
+                            <button type="button" onclick="descargarRemitoTicketPDF()" style="flex: 1; min-width: 200px; padding: 12px; background: #3498db; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;">📥 Descargar PDF del Remito</button>
+                            <button type="button" onclick="confirmarRemito()" style="flex: 1; min-width: 200px; padding: 12px; background: #e67e22; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;">✅ Confirmar Remito y Descontar Stock</button>
+                            <button type="button" onclick="limpiarCarrito()" style="flex: 1; min-width: 180px; padding: 12px; background: #e74c3c; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;">🗑️ Vaciar Remito</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -413,6 +755,7 @@
                     <h3>📝 Nueva Solicitud de Reserva</h3>
                     <button type="button" class="btn-submit" onclick="iniciarCamara('reader-reserva', 'scanner-reserva')" style="background: #3498db; margin-bottom: 15px; max-width: 300px;">📷 Escanear Producto</button>
                     <div id="reader-reserva" style="width: 100%; max-width: 500px; border-radius: 10px; overflow: hidden; margin-bottom: 15px;"></div>
+                    <p class="camera-tip" style="color: #f39c12; font-size: 14px; margin-top: 5px; font-weight: bold; display: none;">💡 Si no enfoca en iPhone, aleje el celular un poco (20-30 cm) y acerque el código lentamente.</p>
 
                     <form action="/crear_reserva" method="POST">
                         <label>Nombre del Vendedor / Operario:</label>
@@ -423,7 +766,7 @@
                             <option value="" disabled selected>-- Buscar o escanear lubricante --</option>
                             {% for p in productos %}
                                 <option value="{{ p[0] }}" data-codigo="{{ p[1] }}">
-                                    {{ p[2] }} | Viscosidad: {{ p[3] }} | {{ p[4] }} (Stock: {{ p[8] }} u.)
+                                    [Código: {{ p[1] }}] {{ p[2] }} | Viscosidad: {{ p[3] }} | {{ p[4] }} (Stock: {{ p[8] }} u.)
                                 </option>
                             {% endfor %}
                         </select>
@@ -480,62 +823,63 @@
                 </div>
             </div>
 
-            <!-- DEPÓSITO 60D -->
-            <div id="deposito" class="tab-content">
-                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
-                <div class="card">
-                    <h2>🏚️ Depósito de Inactivos (+60 Días Sin Ventas)</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Producto</th>
-                                <th>Bulto</th>
-                                <th>Stock</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in productos_deposito %}
-                            <tr>
-                                <td><b>#{{ p[0] }}</b></td>
-                                <td>{{ p[1] }}</td>
-                                <td>x{{ p[4] }} unid.</td>
-                                <td>{{ p[7] }} unid.</td>
-                                <td><a href="/mover_mostrador/{{ p[0] }}" class="btn-submit" style="padding: 6px 12px; font-size: 14px; text-decoration: none; margin-top: 0;">Devolver a Mostrador</a></td>
-                            </tr>
-                            {% else %}
-                            <tr><td colspan="5" style="text-align: center; color: #b0b9c6;">No hay productos archivados.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
             <!-- MÉTRICAS Y RESUMEN MENSUAL -->
             <div id="metricas" class="tab-content">
                 <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
                 
-                <div class="card" style="margin-bottom: 25px;">
-                    <h2 style="color: #2ecc71; margin-top: 0;">📊 Inteligencia de Ventas y Consumo</h2>
-                    <p style="color: #b0b9c6;">Resumen detallado de salidas por marca, graduación de viscosidad y cierres mensuales.</p>
+                <div class="card" style="margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h2 style="color: #2ecc71; margin: 0;">📊 Inteligencia de Ventas y Consumo</h2>
+                        <p style="color: #b0b9c6; margin: 5px 0 0 0;">Resumen detallado de salidas por marca, graduación de viscosidad y cierres mensuales estilo drugstore.</p>
+                    </div>
+                    <!-- SELECTOR DE PERIODO / MES -->
+                    <div style="display: flex; align-items: center; gap: 10px; background: #161922; padding: 8px 14px; border-radius: 8px; border: 1px solid #2f3648;">
+                        <label for="select-periodo-metricas" style="color: #f1c40f; font-weight: bold; font-size: 14px; white-space: nowrap;">📅 Filtrar por Mes:</label>
+                        <select id="select-periodo-metricas" onchange="cambiarPeriodoMetricas(this.value)" style="padding: 7px 12px; background: #1a1e29; color: #fff; border: 1px solid #3498db; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer;">
+                            <option value="todos" {% if mes_seleccionado == 'todos' %}selected{% endif %}>🌐 Histórico Completo (Acumulado)</option>
+                            {% for m in meses_disponibles %}
+                            <option value="{{ m }}" {% if mes_seleccionado == m %}selected{% endif %}>
+                                📆 {{ m }} {% if loop.first %}(Mes Actual / Reciente){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
 
-                <!-- TARJETA PRINCIPAL DE LITROS TOTALES -->
-                <div style="background: #161922; border: 2px solid #2ecc71; padding: 20px; border-radius: 12px; margin-bottom: 25px; text-align: center;">
-                    <h3 style="margin: 0; color: #b0b9c6; text-transform: uppercase; font-size: 14px;">🛢️ Total General Acumulado</h3>
-                    <div style="font-size: 42px; font-weight: bold; color: #2ecc71; margin-top: 5px;">{{ "%.1f"|format(total_litros) }} Lts</div>
+                <!-- TARJETAS PRINCIPALES DEL PERIODO -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                    <div style="background: #161922; border: 2px solid #2ecc71; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.15);">
+                        <h3 style="margin: 0; color: #b0b9c6; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;">
+                            💧 Aceites y Líquidos ({% if mes_seleccionado == 'todos' %}Histórico{% else %}{{ mes_seleccionado }}{% endif %})
+                        </h3>
+                        <div style="font-size: 34px; font-weight: bold; color: #2ecc71; margin-top: 6px;">{{ "%.2f"|format(total_litros_liquidos) }} Lts</div>
+                        <div style="font-size: 12px; color: #7f8c8d; margin-top: 4px;">Tambores, bidones, botellas y aerosoles</div>
+                    </div>
+                    <div style="background: #161922; border: 2px solid #e67e22; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(230, 126, 34, 0.15);">
+                        <h3 style="margin: 0; color: #b0b9c6; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;">
+                            🧈 Grasas Lubricantes ({% if mes_seleccionado == 'todos' %}Histórico{% else %}{{ mes_seleccionado }}{% endif %})
+                        </h3>
+                        <div style="font-size: 34px; font-weight: bold; color: #e67e22; margin-top: 6px;">{{ "%.2f"|format(total_kg_grasas) }} Kg</div>
+                        <div style="font-size: 12px; color: #7f8c8d; margin-top: 4px;">Baldes, potes y cartuchos de grasa</div>
+                    </div>
+                    <div style="background: #161922; border: 2px solid #3498db; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.15);">
+                        <h3 style="margin: 0; color: #b0b9c6; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;">
+                            💵 Total Facturado ({% if mes_seleccionado == 'todos' %}Histórico{% else %}{{ mes_seleccionado }}{% endif %})
+                        </h3>
+                        <div style="font-size: 34px; font-weight: bold; color: #3498db; margin-top: 6px;">${{ "{:,.2f}".format(total_facturacion) }}</div>
+                        <div style="font-size: 12px; color: #f1c40f; margin-top: 4px; font-weight: bold;">📦 Vol. Consolidado: {{ "%.2f"|format(total_litros) }} Lts/Kg</div>
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 25px;">
                     <!-- TABLA POR MARCA -->
-                    <div class="card" style="flex: 1; min-width: 300px;">
-                        <h3 style="color: #3498db; margin-top: 0;">🏷️ Consumo por Marca</h3>
+                    <div class="card" style="flex: 1; min-width: 320px;">
+                        <h3 style="color: #3498db; margin-top: 0;">🏷️ Consumo por Marca ({% if mes_seleccionado == 'todos' %}Histórico{% else %}{{ mes_seleccionado }}{% endif %})</h3>
                         <table>
                             <thead>
                                 <tr>
                                     <th>Marca</th>
-                                    <th>Litros Vendidos</th>
+                                    <th>Salidas (Lts / Kg)</th>
                                     <th>Total ($)</th>
                                 </tr>
                             </thead>
@@ -543,36 +887,60 @@
                                 {% for m in metricas_marca %}
                                 <tr>
                                     <td><b>{{ m[0] }}</b></td>
-                                    <td><span class="stock-ok">{{ "%.1f"|format(m[1]) }} Lts</span></td>
-                                    <td><b>${{ "%.2f"|format(m[2]) }}</b></td>
+                                    <td>
+                                        <div style="display: flex; flex-direction: column; gap: 3px;">
+                                            {% if m[1] > 0 %}
+                                            <span class="stock-ok" style="white-space: nowrap;">💧 {{ "%.1f"|format(m[1]) }} Lts</span>
+                                            {% endif %}
+                                            {% if m[2] > 0 %}
+                                            <span style="background: rgba(230, 126, 34, 0.2); color: #e67e22; border: 1px solid #e67e22; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 12px; width: fit-content; white-space: nowrap;">🧈 {{ "%.1f"|format(m[2]) }} Kg</span>
+                                            {% endif %}
+                                            {% if m[1] == 0 and m[2] == 0 %}
+                                            <span style="color: #7f8c8d;">0 Lts</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td><b style="color: #2ecc71;">${{ "{:,.2f}".format(m[3]) }}</b></td>
                                 </tr>
                                 {% else %}
-                                <tr><td colspan="3" style="text-align: center; color: #b0b9c6;">Sin datos de ventas.</td></tr>
+                                <tr><td colspan="3" style="text-align: center; color: #b0b9c6;">Sin datos de ventas en este periodo.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- TABLA POR VISCOSIDAD / TIPO -->
-                    <div class="card" style="flex: 1; min-width: 300px;">
-                        <h3 style="color: #f39c12; margin-top: 0;">🧪 Consumo por Viscosidad</h3>
+                    <!-- TABLA POR VISCOSIDAD / TIPO DE GRASA -->
+                    <div class="card" style="flex: 1; min-width: 320px;">
+                        <h3 style="color: #f39c12; margin-top: 0;">🧪 Consumo por Viscosidad y Tipo de Grasa ({% if mes_seleccionado == 'todos' %}Histórico{% else %}{{ mes_seleccionado }}{% endif %})</h3>
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Viscosidad</th>
+                                    <th>Viscosidad / Tipo</th>
                                     <th>Unidades</th>
-                                    <th>Litros Totales</th>
+                                    <th>Volumen Salido</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for v in metricas_viscosidad %}
                                 <tr>
-                                    <td><span class="badge" style="background: #34495e;">{{ v[0] }}</span></td>
+                                    <td>
+                                        {% if v[4] %}
+                                        <span class="badge" style="background: rgba(230, 126, 34, 0.2); color: #e67e22; border: 1px solid #e67e22; font-weight: bold;">🧈 {{ v[0] }}</span>
+                                        {% else %}
+                                        <span class="badge" style="background: #242b3d; color: #ecf0f1; border: 1px solid #34495e;">💧 {{ v[0] }}</span>
+                                        {% endif %}
+                                    </td>
                                     <td><b>{{ v[2] }} u.</b></td>
-                                    <td><span class="stock-ok">{{ "%.1f"|format(v[1]) }} Lts</span></td>
+                                    <td>
+                                        {% if v[4] %}
+                                        <b style="color: #e67e22; font-size: 14px;">{{ "%.1f"|format(v[1]) }} Kg</b>
+                                        {% else %}
+                                        <span class="stock-ok">{{ "%.1f"|format(v[1]) }} Lts</span>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% else %}
-                                <tr><td colspan="3" style="text-align: center; color: #b0b9c6;">Sin datos de ventas.</td></tr>
+                                <tr><td colspan="3" style="text-align: center; color: #b0b9c6;">Sin datos de ventas en este periodo.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -581,31 +949,50 @@
 
                 <!-- SECCIÓN RESUMEN CIERRE MENSUAL -->
                 <div class="card" style="border-left: 5px solid #2ecc71;">
-                    <h3 style="color: #2ecc71; margin-top: 0;">📅 Resumen de Cierre Mensual</h3>
-                    <p style="color: #b0b9c6;">Consolidado automático de ventas al cierre de cada periodo mensual.</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                        <div>
+                            <h3 style="color: #2ecc71; margin-top: 0;">📅 Resumen y Descarga de Cierres Mensuales</h3>
+                            <p style="color: #b0b9c6; margin: 5px 0 0 0;">Consolidado automático de ventas al cierre de cada periodo. Podés descargar la planilla oficial en Excel o generar el comprobante PDF estilo ticket de cierre de caja.</p>
+                        </div>
+                    </div>
                     
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Periodo (Año-Mes)</th>
-                                <th>Operaciones</th>
-                                <th>Litros Salidos</th>
-                                <th>Facturación Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for rm in resumen_mensual %}
-                            <tr>
-                                <td><b>📆 {{ rm[0] }}</b></td>
-                                <td><b>{{ rm[1] }} ventas</b></td>
-                                <td><b style="color: #3498db;">{{ "%.1f"|format(rm[2]) }} Lts</b></td>
-                                <td><b style="color: #2ecc71;">${{ "%.2f"|format(rm[3]) }}</b></td>
-                            </tr>
-                            {% else %}
-                            <tr><td colspan="4" style="text-align: center; color: #b0b9c6;">No hay cierres mensuales registrados aún.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div style="overflow-x: auto; width: 100%;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Periodo (Año-Mes)</th>
+                                    <th>Ventas / Ítems</th>
+                                    <th>💧 Aceites (Lts)</th>
+                                    <th>🧈 Grasas (Kg)</th>
+                                    <th>Facturación Total</th>
+                                    <th style="text-align: center;">Descargar Cierre</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rm in resumen_mensual %}
+                                <tr>
+                                    <td><b style="color: #f1c40f; font-size: 15px;">📆 {{ rm[0] }}</b></td>
+                                    <td><span class="badge" style="background: #2c3e50;">{{ rm[1] }} ventas</span></td>
+                                    <td><b style="color: #2ecc71; font-size: 15px;">{{ "%.2f"|format(rm[2]) }} Lts</b></td>
+                                    <td><b style="color: #e67e22; font-size: 15px;">{{ "%.2f"|format(rm[3]) }} Kg</b></td>
+                                    <td><b style="color: #3498db; font-size: 15px;">${{ "{:,.2f}".format(rm[4]) }}</b></td>
+                                    <td style="text-align: center; white-space: nowrap; width: 280px;">
+                                        <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: auto;">
+                                            <a href="/exportar_cierre_mes/{{ rm[0] }}" style="background: #27ae60; color: #ffffff; padding: 7px 14px; font-size: 13px; font-weight: bold; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.25); white-space: nowrap;" title="Descargar Planilla Excel con Resumen y Detalle">
+                                                📥 Excel Cierre
+                                            </a>
+                                            <button type="button" onclick="descargarTicketCierrePDF('{{ rm[0] }}', '{{ rm[1] }}', '{{ rm[2] }}', '{{ rm[3] }}', '{{ rm[4] }}', '{{ rm[5] }}')" style="background: #3498db; color: #ffffff; padding: 7px 14px; font-size: 13px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.25); white-space: nowrap;" title="Descargar Ticket de Cierre (PDF)">
+                                                🧾 Ticket PDF
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="6" style="text-align: center; color: #b0b9c6; padding: 20px;">No hay cierres mensuales registrados aún.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -617,17 +1004,25 @@
                     
                     <button type="button" class="btn-submit" onclick="iniciarCamara('reader-cargar', 'input-codigo-cargar')" style="background: #3498db; margin-bottom: 15px; max-width: 320px;">📷 Escanear Código de Barras</button>
                     <div id="reader-cargar" style="width: 100%; max-width: 500px; border-radius: 10px; overflow: hidden; margin-bottom: 15px;"></div>
+                    <p class="camera-tip" style="color: #f39c12; font-size: 14px; margin-top: 5px; font-weight: bold; display: none;">💡 Si no enfoca en iPhone, aleje el celular un poco (20-30 cm) y acerque el código lentamente.</p>
 
                     <form action="/agregar" method="POST">
                         <label>Marca:</label>
-                        <select name="marca" required>
-                            <option value="AMA">AMA Lubricants</option>
-                            <option value="GULF">GULF</option>
-                            <option value="OTRA">Otra Marca</option>
-                        </select>
+                        <input type="text" name="marca" list="lista-marcas" placeholder="Ej: AMA, GULF, SHELL, CASTROL..." required style="text-transform: uppercase;">
+                        <datalist id="lista-marcas">
+                            <option value="AMA">
+                            <option value="GULF">
+                            <option value="SHELL">
+                            <option value="CASTROL">
+                            <option value="MOBIL">
+                            <option value="YPF">
+                            <option value="TOTAL">
+                            <option value="PENNZOIL">
+                            <option value="VALVOLINE">
+                        </datalist>
 
-                        <label>Código de Barras:</label>
-                        <input type="text" id="input-codigo-cargar" name="codigo_barras" placeholder="Escanee con la cámara o escriba aquí...">
+                        <label>Código de Barras: <span style="font-size:13px;color:#b0b9c6;font-weight:normal;">(opcional – dejá vacío si no tiene)</span></label>
+                        <input type="text" id="input-codigo-cargar" name="codigo_barras" placeholder="Escanee con la cámara o escriba aquí (opcional)...">
 
                         <label>Nombre / Línea de Producto:</label>
                         <input type="text" name="nombre" required>
@@ -638,35 +1033,176 @@
                         <label>Presentación / Envase:</label>
                         <input type="text" name="presentacion" required>
 
-                        <label>Unidades por Bulto Cerrado:</label>
+                        <label>Envases por Caja (cantidad de botellas/bidones, NO litros): <span style="font-size:12px;color:#b0b9c6;font-weight:normal;">Ej: "CAJA 4 x 4L" → escribí 4</span></label>
                         <input type="number" name="bulto" value="12" required>
+
+                        <div style="background: #1a2035; border-left: 4px solid #f39c12; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; color: #f39c12;">
+                            💡 <b>Precios (Opcional):</b> Podés ingresar el precio de la caja/bulto si lo deseás. Si lo dejás vacío, queda en $0.00 y podés completarlo más adelante.
+                        </div>
 
                         <div style="display: flex; gap: 15px;">
                             <div style="flex: 1;">
-                                <label>Precio Costo Neto ($):</label>
-                                <input type="number" step="0.01" name="precio_costo" required>
+                                <label>Precio Costo de Caja ($): <span style="font-size:12px;color:#b0b9c6;">(opcional)</span></label>
+                                <input type="number" step="0.01" name="precio_costo" value="0" placeholder="0.00 (opcional)">
                             </div>
                             <div style="flex: 1;">
-                                <label>Precio Bulto Final ($):</label>
-                                <input type="number" step="0.01" name="precio_venta" required>
+                                <label>Precio Venta de Caja ($): <span style="font-size:12px;color:#b0b9c6;">(opcional)</span></label>
+                                <input type="number" step="0.01" name="precio_venta" value="0" placeholder="0.00 (opcional)">
                             </div>
                         </div>
 
-                        <label>Stock Inicial (Unidades):</label>
-                        <input type="number" name="stock" value="12" required>
+                        <label>Stock Inicial:</label>
+                        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <label style="margin-top: 0; font-size: 13px; color: #b0b9c6;">Cajas:</label>
+                                <input type="number" name="stock_cajas" value="0" min="0" style="padding: 10px; font-size: 16px;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="margin-top: 0; font-size: 13px; color: #b0b9c6;">Botellas / Envases Sueltos:</label>
+                                <input type="number" name="stock_unidades" value="0" min="0" style="padding: 10px; font-size: 16px;">
+                            </div>
+                        </div>
 
-                        <button type="submit" class="btn-submit">Guardar Producto</button>
+                        <button type="submit" class="btn-submit">💾 Guardar Producto</button>
                     </form>
                 </div>
             </div>
 
-            <!-- GESTIÓN DE LISTAS E INVENTARIO NUEVO -->
+            <!-- GESTIÓN DE LISTAS, DEPÓSITO E INVENTARIO -->
             <div id="gestion_listas" class="tab-content">
                 <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
                 
                 <div class="card" style="margin-bottom: 25px;">
-                    <h2 style="color: #2ecc71;">⚙️ Gestión de Listas e Inventario</h2>
-                    <p style="color: #b0b9c6;">Opciones avanzadas para reiniciar conteos o reemplazar el catálogo oficial de precios y productos.</p>
+                    <h2 style="color: #2ecc71;">⚙️ Gestión de Listas, Depósito e Inventario</h2>
+                    <p style="color: #b0b9c6;">Auditoría de remitos cargados, administración de productos inactivos (+60 días sin ventas), papelera de dados de baja y opciones de reinicio.</p>
+                </div>
+
+                <!-- SECCIÓN HISTORIAL Y AUDITORÍA DE REMITOS Y VENTAS -->
+                <div class="card" style="margin-bottom: 25px; border-left: 5px solid #2ecc71;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                        <div>
+                            <h3 style="color: #2ecc71; margin: 0;">📋 Registro de Remitos y Ventas Cargadas</h3>
+                            <p style="color: #b0b9c6; margin: 5px 0 0 0; font-size: 14px;">Auditoría histórica permanente de remitos con fecha exacta, marcas, volumen y facturación. Podés ver el detalle completo de productos de cualquier remito o anularlo si se cargó por error.</p>
+                        </div>
+                    </div>
+
+                    <!-- BARRA DE FILTROS Y BÚSQUEDA DE REMITOS -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 15px; background: #161922; padding: 12px 16px; border-radius: 8px; border: 1px solid #2d3748;">
+                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label for="filtro-mes-remito" style="font-size: 13px; font-weight: bold; color: #b0b9c6; margin: 0; white-space: nowrap;">📅 Filtrar Mes:</label>
+                                <select id="filtro-mes-remito" onchange="filtrarTablaRemitos()" style="padding: 7px 12px; background: #242b3d; color: #fff; border: 1px solid #2ecc71; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; width: auto;">
+                                    <option value="todos">Todos los Meses (Histórico Completo)</option>
+                                    {% for m in meses_disponibles %}
+                                    <option value="{{ m }}" {% if m == mes_seleccionado %}selected{% endif %}>📆 {{ m }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 220px;">
+                                <input type="text" id="buscador-remitos" onkeyup="filtrarTablaRemitos()" placeholder="🔍 Buscar remito por fecha, marca o producto..." style="width: 100%; padding: 7px 12px; background: #242b3d; color: #fff; border: 1px solid #34495e; border-radius: 6px; font-size: 13px; margin: 0;">
+                            </div>
+                        </div>
+                        <div id="resumen-kpi-remitos" style="font-size: 13px; font-weight: bold; color: #2ecc71; background: rgba(46, 204, 113, 0.12); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(46, 204, 113, 0.3); white-space: nowrap;">
+                            Mostrando {{ historial_remitos|length }} remitos
+                        </div>
+                    </div>
+                    
+                    <div style="overflow-x: auto; width: 100%; max-height: 520px;">
+                        <table id="tabla-registro-remitos">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 140px;">📅 Fecha y Hora</th>
+                                    <th style="min-width: 75px; text-align: center;">Ítems</th>
+                                    <th style="min-width: 260px;">📦 Resumen y Detalle</th>
+                                    <th style="min-width: 130px; text-align: right;">💧 Volumen Salido</th>
+                                    <th style="min-width: 120px; text-align: right;">💵 Total Remito</th>
+                                    <th style="min-width: 100px; text-align: center;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-remitos">
+                                {% for r in historial_remitos %}
+                                <tr class="fila-remito" data-mes="{{ r[4] }}" data-busqueda="{{ r[0] }} {{ r[5] }} {{ r[8] }}" data-litros="{{ r[2] }}" data-monto="{{ r[3] }}">
+                                    <td style="font-weight: bold; color: #f1c40f; white-space: nowrap;">
+                                        🕒 {{ r[0] }}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="badge" style="background: #2c3e50; font-size: 13px;">{{ r[1] }} prod.</span>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                            <div style="font-size: 13px; color: #ecf0f1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px;" title="{{ r[5] }}">
+                                                <b style="color: #3498db;">{{ r[5] }}</b>
+                                                <span style="color: #8892b0; font-size: 12px; margin-left: 4px;">({{ r[1] }} ítems)</span>
+                                            </div>
+                                            <button type="button" onclick="abrirModalDetalleRemito('{{ r[0] }}')" style="background: #1abc9c; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; transition: 0.2s;" onmouseover="this.style.background='#16a085'" onmouseout="this.style.background='#1abc9c'" title="Ver lista completa de productos vendidos en este remito">
+                                                👁️ Ver Detalle
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td style="text-align: right; white-space: nowrap;">
+                                        {% if r[6] > 0 and r[7] > 0 %}
+                                            <div style="font-weight: bold; font-size: 13px; color: #3498db;">💧 {{ "%.2f"|format(r[6]) }} Lts</div>
+                                            <div style="font-weight: bold; font-size: 12px; color: #e67e22;">🧈 {{ "%.2f"|format(r[7]) }} Kg</div>
+                                        {% elif r[7] > 0 %}
+                                            <span style="font-weight: bold; color: #e67e22; font-size: 14px;">🧈 {{ "%.2f"|format(r[7]) }} Kg</span>
+                                        {% else %}
+                                            <span style="font-weight: bold; color: #3498db; font-size: 14px;">💧 {{ "%.2f"|format(r[2]) }} Lts</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: right; font-weight: bold; color: #2ecc71; font-size: 14px; white-space: nowrap;">
+                                        ${{ "{:,.2f}".format(r[3]|float) }}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <form action="/anular_remito" method="POST" style="margin: 0;" onsubmit="return confirm('⚠️ ¿Estás seguro de que deseas ANULAR este remito del {{ r[0] }}?\n\n- Se devolverán todas las unidades al stock del depósito.\n- Se restarán los litros y el dinero de las métricas.');">
+                                            <input type="hidden" name="fecha_remito" value="{{ r[0] }}">
+                                            <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;" title="Anular remito y reponer stock">
+                                                🗑️ Anular
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr id="tr-sin-remitos">
+                                    <td colspan="6" style="text-align: center; color: #b0b9c6; padding: 25px;">
+                                        No hay remitos registrados en el historial de ventas.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN PRODUCTOS EN DEPÓSITO 60D -->
+                <div class="card" style="margin-bottom: 25px; border-left: 5px solid #3498db;">
+                    <h3 style="color: #3498db; margin-top: 0;">🏚️ Depósito de Inactivos (+60 Días Sin Ventas) ({{ productos_deposito|length }})</h3>
+                    <p style="color: #b0b9c6;">Artículos que llevan más de 60 días sin registrar ventas. Podés devolverlos al mostrador cuando vuelvan a tener rotación.</p>
+                    <div style="overflow-x: auto; width: 100%;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Producto</th>
+                                    <th>Bulto</th>
+                                    <th>Stock</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in productos_deposito %}
+                                <tr>
+                                    <td><b>#{{ p[0] }}</b></td>
+                                    <td><span class="badge">{{ p[1] }}</span></td>
+                                    <td>x{{ p[4] }} unid.</td>
+                                    <td><b>{{ p[7] }} unid.</b></td>
+                                    <td><a href="/mover_mostrador/{{ p[0] }}" class="btn-submit" style="padding: 6px 12px; font-size: 14px; text-decoration: none; margin-top: 0; display: inline-block;">🟢 Devolver a Mostrador</a></td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="5" style="text-align: center; color: #b0b9c6; padding: 20px;">No hay productos archivados en depósito (+60 días).</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- SECCIÓN REINICIAR INVENTARIO -->
@@ -677,54 +1213,179 @@
                         <button type="submit" class="btn-submit btn-danger" style="max-width: 320px;">🔄 Blanquear Stock a Cero</button>
                     </form>
                 </div>
-                 <!-- SECCIÓN PRODUCTOS DADOS DE BAJA / PAPELERA -->
-                <div class="card" style="margin-top: 25px; border-left: 5px solid #e67e22;">
-                <h3 style="color: #e67e22; margin-top: 0;">📦 Papelera de Productos (Dados de Baja)</h3>
-                <p style="color: #b0b9c6;">Estos productos no se muestran en el mostrador ni en la venta directa. Podés restaurarlos si te equivocaste o eliminarlos definitivamente para no ocupar espacio.</p>
 
-                <table>
-                <thead>
-                <tr>
-                <th>Código</th>
-                <th>Producto</th>
-                <th>Viscosidad</th>
-                <th>Acciones</th>
-                </tr>
-             </thead>
-                <tbody>
-                {% for p in productos_archivados %}
-                <tr>
-                <td><code>{{ p[1] }}</code></td>
-                <td><b>{{ p[2] }}</b></td>
-                <td>{{ p[3] }}</td>
-                <td style="display: flex; gap: 8px;">
-                    <!-- BOTÓN RESTAURAR (🟢 Vuelve al mostrador) -->
-                    <form action="/restaurar_producto/{{ p[0] }}" method="POST">
-                        <button type="submit" class="btn-submit" style="background: #27ae60; padding: 6px 12px; font-size: 13px; margin: 0; width: auto;">🟢 Restaurar</button>
+                <!-- SECCIÓN REINICIAR MÉTRICAS -->
+                <div class="card" style="margin-bottom: 25px; border-left: 5px solid #f1c40f;">
+                    <h3 style="color: #f1c40f; margin-top: 0;">📊 Reiniciar Historial de Ventas y Métricas</h3>
+                    <p style="color: #b0b9c6;">Usa esta opción para vaciar las estadísticas de ventas acumuladas (litros, dinero y gráficos) y empezar un nuevo período desde cero. No altera el stock actual de productos.</p>
+                    <form action="/reiniciar_ventas" method="POST" onsubmit="return confirm('⚠️ ¿Estás seguro de que deseas REINICIAR el historial de ventas y métricas? Esta acción no se puede deshacer.')">
+                        <button type="submit" class="btn-submit" style="background: #f1c40f; color: #111; max-width: 320px; font-weight: bold;">🗑️ Reiniciar Historial de Ventas</button>
                     </form>
-
-                    <!-- BOTÓN ELIMINACIÓN DEFINITIVA (🗑️ Libera espacio) -->
-                    <form action="/eliminar_definitivo/{{ p[0] }}" method="POST" onsubmit="return confirm('⚠️ ¿ELIMINAR DEFINITIVAMENTE? Esta acción borra el producto para siempre.')">
-                        <button type="submit" class="btn-submit btn-danger" style="padding: 6px 12px; font-size: 13px; margin: 0; width: auto;">🗑️ Borrar Definitivo</button>
-                    </form>
-                    </td>
-                     </tr>
-                {% else %}
-                <tr><td colspan="4" style="text-align: center; color: #b0b9c6;">No hay productos dados de baja en la papelera.</td></tr>
-                {% endfor %}
-                </tbody>
-                </table>
                 </div>
 
-                <!-- SECCIÓN REEMPLAZAR LISTAS DE PRODUCTOS -->
-                <div class="card" style="border-left: 5px solid #3498db;">
-                    <h3 style="color: #3498db; margin-top: 0;">📁 Reemplazar / Importar Lista de Productos</h3>
-                    <p style="color: #b0b9c6;">Carga un archivo Excel (.xlsx) o CSV con el nuevo listado de precios y productos para reemplazar o actualizar la base de datos actual.</p>
-                    <form action="/importar_lista" method="POST" enctype="multipart/form-data">
-                        <label>Seleccionar Archivo (.csv / .xlsx):</label>
-                        <input type="file" name="archivo_lista" accept=".csv, .xlsx" required style="padding: 8px;">
-                        <button type="submit" class="btn-submit" style="background: #3498db; max-width: 320px;">📤 Subir y Reemplazar Lista</button>
+                <!-- SECCIÓN CAMBIAR CONTRASEÑA DE ADMINISTRADOR -->
+                <div class="card" style="margin-bottom: 25px; border-left: 5px solid #2ecc71;">
+                    <h3 style="color: #2ecc71; margin-top: 0;">🔑 Clave / Contraseña de Acceso Administrador</h3>
+                    <p style="color: #b0b9c6;">Esta es la contraseña que se usa para desbloquear el modo Administrador desde otras computadoras o la máquina de mostrador. Podés usar cualquier combinación de letras, números y símbolos (ej: <code>Ramiro2026!</code>).</p>
+                    <form action="/guardar_pin_admin" method="POST" style="display: flex; gap: 10px; max-width: 500px; flex-wrap: wrap;">
+                        <input type="text" name="nuevo_pin" value="{{ pin_admin }}" placeholder="Nueva Contraseña (letras, números o símbolos)" required style="padding: 10px 14px; font-size: 16px; border: 2px solid #2ecc71; border-radius: 6px; flex: 1; min-width: 220px; background: #161922; color: #fff; font-weight: bold;">
+                        <button type="submit" class="btn-submit" style="background: #27ae60; margin: 0; padding: 10px 20px; width: auto; font-weight: bold;">💾 Guardar Contraseña</button>
                     </form>
+                </div>
+
+                 <!-- SECCIÓN PRODUCTOS DADOS DE BAJA / PAPELERA -->
+                <div class="card" style="margin-top: 25px; border-left: 5px solid #e67e22;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                        <div>
+                            <h3 style="color: #e67e22; margin: 0;">📦 Papelera de Productos Dados de Baja ({{ productos_archivados|length }})</h3>
+                            <p style="color: #b0b9c6; margin: 5px 0 0 0; font-size: 14px;">
+                                Productos dados de baja del mostrador. Podés restaurarlos en cualquier momento o eliminarlos definitivamente.
+                            </p>
+                        </div>
+                        {% if productos_archivados %}
+                        <form action="/vaciar_papelera" method="POST" onsubmit="return confirm('⚠️ ¿Estás seguro de que deseas VACIAR TODA LA PAPELERA? Se eliminarán definitivamente los {{ productos_archivados|length }} productos.');">
+                            <button type="submit" class="btn-submit btn-danger" style="margin: 0; padding: 8px 16px; width: auto; font-size: 13px; font-weight: bold;">
+                                🗑️ Vaciar Papelera Ahora ({{ productos_archivados|length }})
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <div style="overflow-x: auto; width: 100%;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Producto</th>
+                                    <th>Viscosidad</th>
+                                    <th>Fecha de Baja</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in productos_archivados %}
+                                <tr>
+                                    <td><code>{{ p[1] }}</code></td>
+                                    <td><b>{{ p[2] }}</b></td>
+                                    <td>{{ p[3] }}</td>
+                                    <td style="color: #f1c40f; font-size: 13px; white-space: nowrap;">
+                                        {% if p[4] %}
+                                            🕒 {{ p[4][:16] }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td style="display: flex; gap: 8px; white-space: nowrap;">
+                                        <!-- BOTÓN RESTAURAR (🟢 Vuelve al mostrador) -->
+                                        <form action="/restaurar_producto/{{ p[0] }}" method="POST" style="margin: 0;">
+                                            <button type="submit" class="btn-submit" style="background: #27ae60; padding: 6px 12px; font-size: 13px; margin: 0; width: auto;" title="Restaurar al catálogo activo">🟢 Restaurar</button>
+                                        </form>
+
+                                        <!-- BOTÓN ELIMINACIÓN DEFINITIVA (🗑️ Libera espacio) -->
+                                        <form action="/eliminar_definitivo/{{ p[0] }}" method="POST" style="margin: 0;" onsubmit="return confirm('⚠️ ¿ELIMINAR DEFINITIVAMENTE? Esta acción borra el producto para siempre.')">
+                                            <button type="submit" class="btn-submit btn-danger" style="padding: 6px 12px; font-size: 13px; margin: 0; width: auto;" title="Borrar de la base de datos">🗑️ Borrar</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="5" style="text-align: center; color: #b0b9c6; padding: 20px;">No hay productos dados de baja en la papelera.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if productos_archivados %}
+                    <div style="display: flex; justify-content: flex-end; margin-top: 15px; padding-top: 12px; border-top: 1px solid #2f3648;">
+                        <form action="/vaciar_papelera" method="POST" onsubmit="return confirm('⚠️ ¿Estás seguro de que deseas VACIAR TODA LA PAPELERA? Se eliminarán definitivamente los {{ productos_archivados|length }} productos.');">
+                            <button type="submit" class="btn-submit btn-danger" style="margin: 0; padding: 9px 20px; font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+                                🗑️ Vaciar Papelera Completa ({{ productos_archivados|length }} productos)
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- REPOSICIÓN / STOCK BAJO Y FALTANTES -->
+            <div id="reposicion" class="tab-content">
+                <button class="btn-back-header" onclick="openTab('inicio')">⬅️ Volver al Inicio</button>
+                <div class="card" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h2 style="margin: 0; color: #e74c3c;">⚠️ Productos para Reposición / Faltantes</h2>
+                        <p style="margin: 5px 0 0 0; color: #b0b9c6;">Listado de artículos agotados (Stock 0) o con bajo stock para generar pedidos al proveedor.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="/exportar_reposicion" class="btn-submit" style="margin: 0; background: #27ae60; text-decoration: none; padding: 10px 18px; width: auto; display: flex; align-items: center; gap: 6px;">📥 Exportar Pedido a Excel</a>
+                        <button onclick="window.print()" class="btn-submit" style="margin: 0; background: #9b59b6; padding: 10px 18px; width: auto;">🖨️ Imprimir</button>
+                    </div>
+                </div>
+
+                <input type="text" id="buscador-reposicion" class="search-box" onkeyup="filtrarTablaReposicion()" placeholder="🔍 Filtrar en lista de reposición por producto, marca o viscosidad...">
+
+                <div style="overflow-x: auto; width: 100%;">
+                    <table id="tabla-reposicion">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Viscosidad</th>
+                                <th>Envase / Bulto</th>
+                                <th>Estado</th>
+                                <th>Stock Actual</th>
+                                {% if perfil == 'admin' %}
+                                <th>Ajustar / Reponer</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in productos_faltantes %}
+                            <tr>
+                                <td><b>#{{ p.id }}</b></td>
+                                <td><code>{{ p.codigo or '-' }}</code></td>
+                                <td><span class="badge">{{ p.nombre }}</span></td>
+                                <td><b>{{ p.viscosidad or '-' }}</b></td>
+                                <td>{{ p.presentacion }} {% if p.bulto > 1 and not p.es_individual %}<span style="font-size:12px;color:#b0b9c6;">(x{{ p.bulto }} u.)</span>{% endif %}</td>
+                                <td>
+                                    {% if p.estado == 'AGOTADO' %}
+                                        <span class="badge" style="background: #e74c3c; color: white;">⛔ AGOTADO</span>
+                                    {% else %}
+                                        <span class="badge" style="background: #f39c12; color: #111;">⚠️ BAJO STOCK</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <b style="color: {% if p.stock == 0 %}#e74c3c{% else %}#f39c12{% endif %}; font-size: 15px;">
+                                        {{ p.stock }} unids.
+                                    </b>
+                                </td>
+                                {% if perfil == 'admin' %}
+                                <td style="white-space: nowrap; text-align: center; width: 225px;">
+                                    <div style="display: inline-flex; align-items: center; gap: 4px; justify-content: center;">
+                                        {% if p.bulto > 1 and not p.es_individual %}
+                                            {% set cajas_act = (p.stock / p.bulto)|int %}
+                                            {% set sueltas_act = p.stock % p.bulto %}
+                                            <input type="number" id="input-cajas-rep-{{ p.id }}" value="{{ cajas_act }}" min="0" style="width: 44px; padding: 4px; text-align: center; margin: 0; font-size: 13px; background: #161922; border: 1px solid #2f3648; color: #fff; border-radius: 4px;" title="Cajas">
+                                            <span style="color: #b0b9c6; font-size: 12px; font-weight: 500;">cajas</span>
+                                            <input type="number" id="input-sueltas-rep-{{ p.id }}" value="{{ sueltas_act }}" min="0" style="width: 44px; padding: 4px; text-align: center; margin: 0; font-size: 13px; background: #161922; border: 1px solid #2f3648; color: #fff; border-radius: 4px;" title="Unidades sueltas">
+                                            <span style="color: #b0b9c6; font-size: 12px; font-weight: 500;">unids.</span>
+                                            <button onclick="guardarAjusteReposicion({{ p.id }}, {{ p.bulto }})" style="background: #27ae60; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">Ok</button>
+                                        {% else %}
+                                            <input type="number" id="input-sueltas-rep-{{ p.id }}" value="{{ p.stock }}" min="0" style="width: 65px; padding: 4px; text-align: center; margin: 0; font-size: 13px; background: #161922; border: 1px solid #2f3648; color: #fff; border-radius: 4px;" title="Unidades totales">
+                                            <span style="color: #b0b9c6; font-size: 12px; font-weight: 500;">unids.</span>
+                                            <button onclick="guardarAjusteReposicion({{ p.id }}, 1)" style="background: #27ae60; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">Ok</button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="{% if perfil == 'admin' %}8{% else %}7{% endif %}" style="text-align: center; padding: 30px; color: #2ecc71; font-size: 16px;">
+                                    🎉 ¡Excelente! No hay productos agotados ni con bajo stock en este momento.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -733,8 +1394,9 @@
 
     <!-- MODAL COMPROBANTE DE VENTA -->
     <div id="modal-ticket" class="modal-bg">
-        <div class="modal-card" style="background: transparent; border: none; padding: 0;">
-            <div class="ticket-card">
+        <div class="modal-card" style="background: transparent; border: none; padding: 0; max-width: 400px;">
+            <div class="ticket-card" style="position: relative;">
+                <span class="modal-close" onclick="cerrarModalTicket()" style="position: absolute; top: 10px; right: 15px; color: #ff4757; font-size: 32px; font-weight: bold; cursor: pointer; z-index: 9999;">&times;</span>
                 <div class="ticket-header">
                     <h3 style="margin: 0;">ÓLEOS MINERALES SRL</h3>
                     <small>COMPROBANTE NO VÁLIDO COMO FACTURA</small><br>
@@ -756,7 +1418,7 @@
                     TOTAL: <span id="ticket-total-val">$0.00</span>
                 </div>
                 <div style="margin-top: 20px; display: flex; gap: 10px;">
-                    <button onclick="window.print()" style="flex: 1; padding: 10px; background: #3498db; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">🖨️ Imprimir</button>
+                    <button onclick="descargarTicketPDF()" style="flex: 1; padding: 10px; background: #3498db; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">📥 Descargar PDF</button>
                     <button onclick="confirmarVentasForm()" style="flex: 1; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">✅ Descontar Stock</button>
                 </div>
             </div>
@@ -765,19 +1427,180 @@
 
     <!-- MODAL DETALLE MOSTRADOR -->
     <div id="modal-detalle" class="modal-bg">
-        <div class="modal-card">
+        <div class="modal-card" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
             <span class="modal-close" onclick="cerrarModal()">&times;</span>
             <h2 id="modal-titulo" style="color: #2ecc71; margin-top: 0;">--</h2>
             <p id="modal-subtitulo" style="color: #b0b9c6; margin-bottom: 20px;">--</p>
             
             <div style="background: #161922; border-radius: 8px; padding: 15px; margin: 10px 0; border-left: 5px solid #2ecc71;">
-                <div style="font-size: 13px; color: #b0b9c6; text-transform: uppercase; font-weight: bold;">📦 PRECIO BULTO CERRADO (CON IVA 21%)</div>
+                <div style="font-size: 13px; color: #b0b9c6; text-transform: uppercase; font-weight: bold;">📦 PRECIO CAJA CERRADA (CON IVA 21%)</div>
                 <div id="modal-precio-bulto" style="font-size: 26px; font-weight: bold; color: #2ecc71;">$0.00</div>
             </div>
 
             <div style="background: #161922; border-radius: 8px; padding: 15px; margin: 10px 0; border-left: 5px solid #3498db;">
-                <div style="font-size: 13px; color: #3498db; text-transform: uppercase; font-weight: bold;">🧪 PRECIO UNITARIO / LITRO (CON IVA)</div>
+                <div style="font-size: 13px; color: #3498db; text-transform: uppercase; font-weight: bold;">🧪 PRECIO POR ENVASE / UNIDAD (CON IVA)</div>
                 <div id="modal-precio-unitario" style="font-size: 26px; font-weight: bold; color: #3498db;">$0.00</div>
+            </div>
+
+            <!-- FORMULARIO DE EDICIÓN COMPLETA DEL PRODUCTO (SOLO ADMINISTRADOR) -->
+            {% if perfil == 'admin' %}
+            <form action="/editar_precios_barras" method="POST" id="form-editar-producto" onsubmit="guardarEdicionProductoAjax(event)" style="margin-top: 25px; border-top: 2px solid #2f3648; padding-top: 20px; text-align: left;">
+                <input type="hidden" id="edit-id-producto" name="id_producto" value="">
+                
+                <h3 style="color: #f39c12; margin-top: 0; display: flex; align-items: center; gap: 8px; font-size: 18px;">✏️ Editar Detalles del Producto</h3>
+                
+                <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                    <div style="flex: 1;">
+                        <label style="margin-top: 0; font-size: 14px;">Marca:</label>
+                        <input type="text" id="edit-marca" name="marca" list="lista-marcas-edit" placeholder="Ej: AMA, GULF..." style="font-size: 15px; padding: 9px; margin-top: 4px; text-transform: uppercase;">
+                        <datalist id="lista-marcas-edit">
+                            <option value="AMA"><option value="GULF"><option value="SHELL">
+                            <option value="CASTROL"><option value="MOBIL"><option value="YPF">
+                            <option value="TOTAL"><option value="VALVOLINE"><option value="AMPAC">
+                        </datalist>
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="margin-top: 0; font-size: 14px;">Nombre / Línea:</label>
+                        <input type="text" id="edit-nombre-linea" name="nombre_linea" placeholder="Ej: GP 15W-40 LARGA VIDA BIDON" style="font-size: 15px; padding: 9px; margin-top: 4px;">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                    <div style="flex: 1;">
+                        <label style="margin-top: 0; font-size: 14px;">Viscosidad:</label>
+                        <input type="text" id="edit-viscosidad" name="viscosidad" placeholder="Ej: 15W-40" style="font-size: 15px; padding: 9px; margin-top: 4px;">
+                    </div>
+                    <div style="flex: 2;">
+                        <label style="margin-top: 0; font-size: 14px;">Presentación / Envase:</label>
+                        <input type="text" id="edit-presentacion" name="presentacion" placeholder="Ej: Bidón x 4 Lt" oninput="actualizarPreciosModalEnTiempoReal()" style="font-size: 15px; padding: 9px; margin-top: 4px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="margin-top: 0; font-size: 14px;">Unid. por Bulto:</label>
+                        <input type="number" id="edit-bulto" name="bulto_unidades" min="1" oninput="actualizarPreciosModalEnTiempoReal()" style="font-size: 15px; padding: 9px; margin-top: 4px;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="margin-top: 0; font-size: 14px;">Código de Barras: <span style="font-size:12px;color:#b0b9c6;">(opcional)</span></label>
+                    <input type="text" id="edit-codigo" name="codigo_barras" placeholder="Sin código de barras registrado..." style="font-size: 15px; padding: 9px; margin-top: 4px;">
+                </div>
+
+                <div style="background: #1a2035; border-left: 4px solid #f39c12; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 12px; color: #f39c12;">
+                    💡 <b>Escribí el precio POR UNIDAD/BOTELLA (opcional).</b> Si lo dejás en blanco queda en $0.00.
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-bottom: 12px;">
+                    <div style="flex: 1;">
+                        <label style="margin-top: 0; font-size: 14px;">Costo por Unidad ($): <span style="font-size:12px;color:#b0b9c6;">(opcional)</span></label>
+                        <input type="number" step="0.01" id="edit-costo" name="precio_costo" placeholder="0.00" style="font-size: 16px; padding: 10px; margin-top: 4px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="margin-top: 0; font-size: 14px;">Venta por Unidad ($): <span style="font-size:12px;color:#b0b9c6;">(opcional)</span></label>
+                        <input type="number" step="0.01" id="edit-venta" name="precio_venta" placeholder="0.00" oninput="actualizarPreciosModalEnTiempoReal()" style="font-size: 16px; padding: 10px; margin-top: 4px;">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" style="background: #e67e22; margin-top: 10px; padding: 12px; font-size: 16px; font-weight: bold; width: 100%;">💾 Guardar Todos los Cambios</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- MODAL DE SINCRONIZACIÓN (ENVIAR AL MOSTRADOR / BACKUP) -->
+    <div id="modal-sync" class="modal-bg">
+        <div class="modal-card" style="max-width: 500px;">
+            <span class="modal-close" onclick="cerrarModalSync()">&times;</span>
+            <h2 style="color: #3498db; margin-top: 0;">🔄 Sincronizar con Mostrador</h2>
+            <p style="color: #b0b9c6; font-size: 14px;">Enviá los productos y precios recién cargados a la computadora del Mostrador en 1 clic a través del Wi-Fi.</p>
+
+            <div style="background: #161922; border-radius: 8px; padding: 15px; margin-bottom: 20px; border: 1px solid #2f3648;">
+                <label style="font-size: 13px; color: #b0b9c6; margin-top: 0;">Dirección IP de la computadora de Mostrador:</label>
+                <input type="text" id="sync-ip-mostrador" placeholder="Ej: 192.168.1.50 ó 192.168.1.50:5000" style="font-size: 16px; padding: 10px; margin: 6px 0 10px 0; border: 2px solid #3498db;">
+                <button type="button" onclick="enviarSyncMostrador()" id="btn-sync-enviar" class="btn-submit" style="background: #27ae60; margin-top: 0; padding: 12px; font-size: 15px; font-weight: bold; width: 100%;">🚀 Enviar Catálogo al Mostrador Ahora</button>
+                <div id="sync-status" style="margin-top: 10px; font-size: 14px; font-weight: 600; display: none;"></div>
+            </div>
+
+            <div style="border-top: 1px solid #2f3648; padding-top: 15px;">
+                <h4 style="color: #f1c40f; margin: 0 0 10px 0;">💾 Respaldo Manual para Pendrive</h4>
+                <div style="display: flex; gap: 10px;">
+                    <a href="/sync/descargar_backup" class="btn-submit" style="flex: 1; background: #34495e; text-decoration: none; text-align: center; padding: 10px; font-size: 13px;">💾 Guardar en Pendrive</a>
+                    <button type="button" onclick="document.getElementById('input-file-backup').click()" class="btn-submit" style="flex: 1; background: #e67e22; padding: 10px; font-size: 13px; margin: 0;">📥 Cargar de Pendrive</button>
+                </div>
+                <form action="/sync/restaurar_backup" method="POST" enctype="multipart/form-data" id="form-restaurar-backup" style="display: none;">
+                    <input type="file" id="input-file-backup" name="db_file" accept=".db" onchange="document.getElementById('form-restaurar-backup').submit()">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE INGRESO DE CONTRASEÑA PARA MODO ADMINISTRADOR -->
+    <div id="modal-pin-admin" class="modal-bg">
+        <div class="modal-card" style="max-width: 420px; text-align: center;">
+            <span class="modal-close" onclick="cerrarModalPinAdmin()">&times;</span>
+            <h2 style="color: #2ecc71; margin-top: 0;">🔓 Acceso Administrador</h2>
+            <p style="color: #b0b9c6; font-size: 14px;">Ingresá la contraseña de administrador para habilitar las opciones de edición en esta computadora.</p>
+
+            <form action="/cambiar_modo" method="POST">
+                <input type="hidden" name="modo" value="admin">
+                <input type="password" name="pin" placeholder="Contraseña de Administrador" required style="font-size: 18px; text-align: center; padding: 12px; margin: 15px 0; border: 2px solid #2ecc71; border-radius: 8px; width: 100%; box-sizing: border-box; background: #161922; color: #fff;">
+                <button type="submit" class="btn-submit" style="background: #27ae60; padding: 12px; font-size: 16px; font-weight: bold; width: 100%;">Entrar como Administrador</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE DETALLE COMPLETO DE REMITO -->
+    <div id="modal-detalle-remito" class="modal-bg">
+        <div class="modal-card" style="max-width: 780px; width: 95%; max-height: 90vh; overflow-y: auto; border-color: #3498db;">
+            <span class="modal-close" onclick="cerrarModalDetalleRemito()">&times;</span>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap;">
+                <h2 style="color: #3498db; margin: 0; font-size: 22px;">📋 Detalle Completo del Remito</h2>
+                <span id="modal-remito-badge-fecha" style="background: #161922; color: #f1c40f; border: 1px solid #34495e; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 13px;"></span>
+            </div>
+            <p style="color: #b0b9c6; font-size: 13px; margin: 0 0 15px 0;">Auditoría detallada con la lista completa de artículos vendidos, presentaciones, volumen y subtotales.</p>
+
+            <!-- RESUMEN EN TARJETAS DEL REMITO -->
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 140px; background: #161922; padding: 10px 14px; border-radius: 8px; border-left: 4px solid #3498db;">
+                    <div style="font-size: 11px; color: #b0b9c6; text-transform: uppercase; font-weight: bold;">Artículos Cargados</div>
+                    <div id="modal-remito-items-count" style="font-size: 18px; font-weight: bold; color: #fff; margin-top: 2px;">-</div>
+                </div>
+                <div style="flex: 1; min-width: 160px; background: #161922; padding: 10px 14px; border-radius: 8px; border-left: 4px solid #2ecc71;">
+                    <div style="font-size: 11px; color: #b0b9c6; text-transform: uppercase; font-weight: bold;">Volumen Despachado</div>
+                    <div id="modal-remito-volumen-total" style="font-size: 18px; font-weight: bold; color: #2ecc71; margin-top: 2px;">-</div>
+                </div>
+                <div style="flex: 1; min-width: 160px; background: #161922; padding: 10px 14px; border-radius: 8px; border-left: 4px solid #f1c40f;">
+                    <div style="font-size: 11px; color: #b0b9c6; text-transform: uppercase; font-weight: bold;">Total del Remito</div>
+                    <div id="modal-remito-monto-total" style="font-size: 18px; font-weight: bold; color: #f1c40f; margin-top: 2px;">-</div>
+                </div>
+            </div>
+
+            <!-- TABLA DE ARTÍCULOS VENDIDOS -->
+            <div style="overflow-x: auto; width: 100%; border: 1px solid #2f3648; border-radius: 8px; margin-bottom: 18px; max-height: 380px;">
+                <table style="width: 100%; font-size: 14px; margin: 0; background: #161922;">
+                    <thead style="position: sticky; top: 0; z-index: 2;">
+                        <tr>
+                            <th style="padding: 10px; width: 35px; text-align: center;">#</th>
+                            <th style="padding: 10px;">Producto Vendido</th>
+                            <th style="padding: 10px; width: 115px;">Presentación</th>
+                            <th style="padding: 10px; text-align: center; width: 85px;">Cantidad</th>
+                            <th style="padding: 10px; text-align: right; width: 105px;">Lts / Kg</th>
+                            <th style="padding: 10px; text-align: right; width: 120px;">Subtotal ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-remito-tbody">
+                        <tr><td colspan="6" style="text-align: center; padding: 25px; color: #b0b9c6;">Cargando detalle del remito...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- BOTONES DE ACCIÓN -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-top: 1px solid #2f3648; padding-top: 14px;">
+                <button type="button" onclick="descargarTicketRemitoHistoricoPDF()" class="btn-submit" style="margin: 0; background: #3498db; width: auto; padding: 10px 18px; font-size: 14px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+                    🧾 Descargar Ticket PDF del Remito
+                </button>
+                <button type="button" onclick="cerrarModalDetalleRemito()" class="btn-submit" style="margin: 0; background: #34495e; width: auto; padding: 10px 22px; font-size: 14px; font-weight: bold;">
+                    Cerrar
+                </button>
             </div>
         </div>
     </div>
@@ -790,59 +1613,109 @@
         document.addEventListener("DOMContentLoaded", function() {
             selectVentaControl = new TomSelect("#select-venta", { create: false, sortField: { field: "text", order: "asc" } });
             selectReservaControl = new TomSelect("#select-reserva", { create: false, sortField: { field: "text", order: "asc" } });
-        });
 
-        function obtenerBaseProductos() {
-            const filas = document.querySelectorAll("#tabla-productos tbody tr");
-            const productos = [];
-            filas.forEach(tr => {
-                if (tr.dataset.id) {
-                    productos.push({
-                        id: parseInt(tr.dataset.id),
-                        codigo: tr.dataset.codigo || "",
-                        nombre: tr.dataset.nombre || "",
-                        viscosidad: tr.dataset.viscosidad || "",
-                        presentacion: tr.dataset.presentacion || "",
-                        bulto: parseInt(tr.dataset.bulto) || 1,
-                        stock: parseInt(tr.dataset.stock) || 0
-                    });
-                }
-            });
-            return productos;
-        }
-
-        function iniciarCamara(elementId, targetInputOrSelect) {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear();
-                html5QrcodeScanner = null;
+            // Capturar la tecla Enter en el input de códigos de barras (evita bugs con lector físico)
+            const inputScanner = document.getElementById("input-codigo-scanner");
+            if (inputScanner) {
+                inputScanner.addEventListener("keypress", function(e) {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        buscarProductoPorCodigo(this.value);
+                    }
+                });
             }
 
-            html5QrcodeScanner = new Html5QrcodeScanner(elementId, { fps: 10, qrbox: { width: 250, height: 150 } });
-            html5QrcodeScanner.render((decodedText) => {
-                if (targetInputOrSelect === 'scanner-venta') {
-                    seleccionarPorCodigo(decodedText, selectVentaControl);
-                } else if (targetInputOrSelect === 'scanner-reserva') {
-                    seleccionarPorCodigo(decodedText, selectReservaControl);
-                } else {
-                    document.getElementById(targetInputOrSelect).value = decodedText;
-                    if (targetInputOrSelect === 'input-codigo-scanner') {
-                        buscarProductoPorCodigo(decodedText);
-                    }
+            // Restaurar pestaña activa guardada en la última sesión o parámetro URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            const activeTab = tabParam || localStorage.getItem('active_tab') || 'inicio';
+            openTab(activeTab);
+
+            // Inicializar filtro y conteo de remitos
+            if (typeof filtrarTablaRemitos === 'function') {
+                filtrarTablaRemitos();
+            }
+        });
+
+        function iniciarCamara(elementId, targetInputOrSelect) {
+            try {
+                // Mostrar sugerencias de enfoque en iPhone
+                document.querySelectorAll(".camera-tip").forEach(el => el.style.display = "block");
+
+                if (html5QrcodeScanner) {
+                    html5QrcodeScanner.clear().catch(err => console.log("Error al limpiar lector:", err));
+                    html5QrcodeScanner = null;
                 }
-            });
+
+                // Función dinámica para que el qrbox sea responsivo y rectangular para códigos de barra
+                let qrboxFunction = function(viewfinderWidth, viewfinderHeight) {
+                    let minEdgePercentage = 0.7; // 70% del borde mínimo
+                    let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                    let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+                    return {
+                        width: qrboxSize,
+                        height: Math.floor(qrboxSize * 0.6) // Proporción rectangular para código de barras
+                    };
+                };
+
+                html5QrcodeScanner = new Html5QrcodeScanner(elementId, { 
+                    fps: 20, 
+                    qrbox: qrboxFunction,
+                    videoConstraints: {
+                        facingMode: "environment", // Fuerza la cámara trasera del celular
+                        width: { min: 640, ideal: 1280, max: 1920 },
+                        height: { min: 480, ideal: 720, max: 1080 }
+                    },
+                    rememberLastUsedCamera: true
+                });
+
+                html5QrcodeScanner.render((decodedText) => {
+                    // Detener cámara al escanear correctamente para no sobrecargar el celular y evitar multi-escaneos
+                    if (html5QrcodeScanner) {
+                        html5QrcodeScanner.clear().catch(err => console.log("Error al limpiar lector:", err));
+                        html5QrcodeScanner = null;
+                    }
+                    // Ocultar tips al terminar escaneo
+                    document.querySelectorAll(".camera-tip").forEach(el => el.style.display = "none");
+
+                    if (targetInputOrSelect === 'scanner-venta') {
+                        seleccionarPorCodigo(decodedText, selectVentaControl);
+                    } else if (targetInputOrSelect === 'scanner-reserva') {
+                        seleccionarPorCodigo(decodedText, selectReservaControl);
+                    } else {
+                        document.getElementById(targetInputOrSelect).value = decodedText;
+                        if (targetInputOrSelect === 'input-codigo-scanner') {
+                            buscarProductoPorCodigo(decodedText);
+                        }
+                    }
+                }, (errorMessage) => {
+                    // Se ignora el log de fallas parciales del escáner en bucle para no inundar la consola
+                });
+            } catch (error) {
+                console.error("No se pudo iniciar la cámara:", error);
+                alert("⚠️ Error al acceder a la cámara. Asegúrese de otorgar permisos o conectar un dispositivo válido.");
+            }
         }
 
         function seleccionarPorCodigo(codigo, tomSelectControl) {
             codigo = codigo.trim().toUpperCase();
-            const baseProductos = obtenerBaseProductos();
-            const prod = baseProductos.find(p => p.codigo.toUpperCase() === codigo || p.id.toString() === codigo);
+            if (!codigo) return;
 
-            if (prod && tomSelectControl) {
-                tomSelectControl.setValue(prod.id);
-                alert(`✅ Producto seleccionado: ${prod.nombre}`);
-            } else {
-                alert(`⚠️ No se encontró ningún producto asociado al código: ${codigo}`);
-            }
+            fetch(`/api/producto/${encodeURIComponent(codigo)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Producto no encontrado");
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && tomSelectControl) {
+                        const prod = data.producto;
+                        tomSelectControl.setValue(prod.id);
+                        alert(`✅ Producto seleccionado: ${prod.nombre}`);
+                    }
+                })
+                .catch(err => {
+                    alert(`⚠️ No se encontró ningún producto asociado al código: ${codigo}`);
+                });
         }
 
         function generarComprobante(event) {
@@ -853,16 +1726,46 @@
             if (!selectedOption.value) return;
 
             const nombre = selectedOption.dataset.nombre || selectedOption.text;
-            const cantidad = parseInt(document.getElementById("venta-cantidad").value);
-            const precioUnitario = parseFloat(selectedOption.dataset.precio || 0);
-            const total = cantidad * precioUnitario;
+            const bultoUnidades = parseInt(selectedOption.dataset.bulto || 1);
+            
+            const tipoVenta = document.querySelector('input[name="tipo_venta"]:checked').value;
+            const cantidad = parseInt(document.getElementById("venta-cantidad").value || 0);
+            const cantidadBonificada = parseInt(document.getElementById("venta-bonificada").value || 0);
+            
+            if (cantidad + cantidadBonificada <= 0) {
+                alert("⚠️ La suma de cantidad a cobrar y cantidad de regalo debe ser mayor a 0.");
+                return;
+            }
+
+            const precioBulto = parseFloat(selectedOption.dataset.precio || 0);
+            const precioUnitario = precioBulto / bultoUnidades;
+
+            let total = 0;
+            let displayPrecio = 0;
+            let displayCant = "";
+
+            if (tipoVenta === 'bulto') {
+                total = cantidad * precioBulto;
+                displayPrecio = precioBulto;
+                displayCant = `${cantidad} caja/s (x${bultoUnidades} u.)`;
+                if (cantidadBonificada > 0) {
+                    displayCant += ` [+${cantidadBonificada} REGALO]`;
+                }
+            } else {
+                total = cantidad * precioUnitario;
+                displayPrecio = precioUnitario;
+                displayCant = `${cantidad} unidad/es`;
+                if (cantidadBonificada > 0) {
+                    displayCant += ` [+${cantidadBonificada} REGALO]`;
+                }
+            }
 
             const fechaHora = new Date().toLocaleString('es-AR', { hour12: false });
 
             document.getElementById("ticket-fecha").textContent = fechaHora;
             document.getElementById("ticket-prod").textContent = nombre;
-            document.getElementById("ticket-cant").textContent = `${cantidad} u.`;
-            document.getElementById("ticket-precio").textContent = `$${precioUnitario.toFixed(2)}`;
+            document.getElementById("ticket-cant").textContent = displayCant;
+            document.getElementById("ticket-precio").textContent = `$${displayPrecio.toFixed(2)}`;
             document.getElementById("ticket-total-val").textContent = `$${total.toFixed(2)}`;
 
             document.getElementById("modal-ticket").style.display = "flex";
@@ -872,38 +1775,550 @@
             document.getElementById("form-venta").submit();
         }
 
-        function buscarProductoPorCodigo(codigo) {
-            codigo = codigo.trim().toUpperCase();
-            const baseProductos = obtenerBaseProductos();
-            const prod = baseProductos.find(p => p.codigo.toUpperCase() === codigo || p.id.toString() === codigo);
+        function cerrarModalTicket() {
+            document.getElementById("modal-ticket").style.display = "none";
+        }
 
-            if (prod) {
-                document.getElementById("scan-id-producto").value = prod.id;
-                document.getElementById("scan-nombre").textContent = prod.nombre;
-                document.getElementById("scan-detalles").textContent = `Código: ${prod.codigo} | Viscosidad: ${prod.viscosidad} | ${prod.presentacion} (x${prod.bulto} u.)`;
-                document.getElementById("scan-stock").textContent = prod.stock;
-                document.getElementById("scan-nuevo-stock").value = prod.stock;
-                document.getElementById("resultado-escaneo").style.display = "block";
-            } else {
-                alert(`⚠️ No se encontró ningún producto con el código: ${codigo}`);
+        function descargarTicketPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                // Formato ticket térmico: 80mm de ancho, 120mm de alto
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: [80, 120]
+                });
+
+                const fecha = document.getElementById("ticket-fecha").textContent;
+                const producto = document.getElementById("ticket-prod").textContent;
+                const cantidad = document.getElementById("ticket-cant").textContent;
+                const precio = document.getElementById("ticket-precio").textContent;
+                const total = document.getElementById("ticket-total-val").textContent;
+
+                // Margen y alineación
+                doc.setFont("courier", "bold");
+                doc.setFontSize(11);
+                doc.text("ÓLEOS MINERALES SRL", 40, 10, { align: "center" });
+                
+                doc.setFont("courier", "normal");
+                doc.setFontSize(8);
+                doc.text("COMPROBANTE NO VÁLIDO COMO FACTURA", 40, 15, { align: "center" });
+                doc.text(fecha, 40, 20, { align: "center" });
+                doc.text("------------------------------------------", 40, 24, { align: "center" });
+
+                doc.setFontSize(9);
+                doc.text("PRODUCTO:", 6, 30);
+                
+                // Dividir el nombre del producto en múltiples líneas si es largo para evitar desbordes
+                const splitProducto = doc.splitTextToSize(producto, 68);
+                doc.text(splitProducto, 6, 35);
+                
+                let currentY = 35 + (splitProducto.length * 4);
+                
+                doc.text(`CANTIDAD: ${cantidad}`, 6, currentY);
+                currentY += 5;
+                doc.text(`PRECIO UNIT.: ${precio}`, 6, currentY);
+                currentY += 5;
+                doc.text("------------------------------------------", 40, currentY, { align: "center" });
+                
+                currentY += 7;
+                doc.setFont("courier", "bold");
+                doc.setFontSize(11);
+                doc.text(`TOTAL A PAGAR: ${total}`, 6, currentY);
+
+                // Nombre de archivo descriptivo
+                const nombreLimpio = producto.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 25);
+                const nombreArchivo = `Ticket_${nombreLimpio}_${Date.now()}.pdf`;
+                doc.save(nombreArchivo);
+            } catch (error) {
+                console.error("Error al generar PDF:", error);
+                alert("⚠️ No se pudo generar el archivo PDF. Verifique que el navegador tenga permisos de descarga.");
             }
         }
 
+        function mostrarAlertaJS(mensaje, tipo = 'success') {
+            const viejas = document.querySelectorAll('.alert-js-temp');
+            viejas.forEach(v => v.remove());
+
+            const div = document.createElement('div');
+            div.className = `alert-card alert-${tipo} alert-js-temp`;
+            div.style.position = 'fixed';
+            div.style.top = '20px';
+            div.style.left = '50%';
+            div.style.transform = 'translateX(-50%)';
+            div.style.zIndex = '9999';
+            div.style.minWidth = '300px';
+            div.style.textAlign = 'center';
+            div.innerHTML = `<strong>${mensaje}</strong>`;
+            document.body.appendChild(div);
+
+            setTimeout(() => {
+                div.style.opacity = '0';
+                div.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => div.remove(), 500);
+            }, 3500);
+        }
+
+        function sumarUnoAjax(id_producto) {
+            fetch('/api/actualizar_stock_ajax', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_producto: id_producto, incrementar_uno: true })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlertaJS(`➕ SUMADO +1: ${data.nombre} (Stock actual: ${data.nuevo_stock} u.)`, 'success');
+                    const inputScanner = document.getElementById("input-codigo-scanner");
+                    if (inputScanner) {
+                        inputScanner.value = "";
+                        inputScanner.focus();
+                    }
+                } else {
+                    mostrarAlertaJS(`⚠️ Error: ${data.message}`, 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarAlertaJS("⚠️ Fallo al conectar con el servidor", "error");
+            });
+        }
+
+        function guardarStockManualAjax(event) {
+            event.preventDefault();
+            const id_producto = document.getElementById("scan-id-producto").value;
+            const nuevo_stock = document.getElementById("scan-nuevo-stock").value;
+
+            fetch('/api/actualizar_stock_ajax', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_producto: id_producto, nuevo_stock: nuevo_stock, incrementar_uno: false })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlertaJS(`💾 Stock guardado: ${data.nombre} (${data.nuevo_stock} u.)`, 'success');
+                    document.getElementById("resultado-escaneo").style.display = "none";
+                    const inputScanner = document.getElementById("input-codigo-scanner");
+                    if (inputScanner) {
+                        inputScanner.value = "";
+                        inputScanner.focus();
+                    }
+                } else {
+                    mostrarAlertaJS(`⚠️ Error: ${data.message}`, 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarAlertaJS("⚠️ Fallo al conectar con el servidor", "error");
+            });
+        }
+
+        function guardarEdicionProductoAjax(event) {
+            event.preventDefault();
+            const id_producto = document.getElementById("edit-id-producto").value;
+            const marca = document.getElementById("edit-marca").value.trim();
+            const nombre_linea = document.getElementById("edit-nombre-linea").value.trim();
+            const viscosidad = document.getElementById("edit-viscosidad").value.trim();
+            const presentacion = document.getElementById("edit-presentacion").value.trim();
+            const bulto_unidades = document.getElementById("edit-bulto").value;
+            const codigo_barras = document.getElementById("edit-codigo").value.trim();
+            const precio_costo = document.getElementById("edit-costo").value;
+            const precio_venta = document.getElementById("edit-venta").value;
+
+            fetch('/editar_precios_barras_ajax', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id_producto, marca, nombre_linea, viscosidad,
+                    presentacion, bulto_unidades, codigo_barras,
+                    precio_costo, precio_venta
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlertaJS("✅ Producto actualizado correctamente", "success");
+                    cerrarModal();
+                    // Actualizar la fila visualmente sin recargar la página
+                    const fila = document.querySelector(`tr[data-id="${id_producto}"]`);
+                    if (fila) {
+                        const nombreCompleto = data.nombre_completo || `${marca} - ${nombre_linea}`;
+                        const precioCostoCaja = data.precio_costo || (precio_costo * bulto_unidades);
+                        const precioVentaCaja = data.precio_venta || (precio_venta * bulto_unidades);
+
+                        fila.dataset.codigo = codigo_barras;
+                        fila.dataset.costo = precioCostoCaja;
+                        fila.dataset.venta = precioVentaCaja;
+                        fila.dataset.viscosidad = viscosidad;
+                        fila.dataset.presentacion = presentacion;
+                        fila.dataset.bulto = bulto_unidades;
+                        fila.dataset.nombre = nombreCompleto;
+                        const celdaCodigo = fila.cells[1];
+                        if (celdaCodigo) celdaCodigo.innerHTML = `<code>${codigo_barras || ''}</code>`;
+                        const celdaNombre = fila.cells[2];
+                        if (celdaNombre) {
+                            const badge = celdaNombre.querySelector('.badge');
+                            if (badge) badge.textContent = nombreCompleto;
+                        }
+                        const celdaPrecio = fila.cells[5];
+                        if (celdaPrecio) celdaPrecio.innerHTML = `<b>$${parseFloat(precioVentaCaja).toFixed(2)}</b>`;
+                    }
+                } else {
+                    mostrarAlertaJS(`⚠️ Error: ${data.message}`, 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarAlertaJS("⚠️ Fallo al conectar con el servidor", "error");
+            });
+        }
+
+        // ==================== CARRITO DE VENTA / REMITO ====================
+        let carrito = [];
+
+        function agregarAlCarrito() {
+            const selectVenta = selectVentaControl;
+            const idProducto = selectVenta.getValue();
+            if (!idProducto) {
+                mostrarAlertaJS("⚠️ Seleccioná un producto antes de agregar.", "error");
+                return;
+            }
+
+            // Leer el <option> real del DOM con sus data-attributes
+            const opcionDOM = document.querySelector(`#select-venta option[value="${idProducto}"]`);
+            if (!opcionDOM) {
+                mostrarAlertaJS("⚠️ No se encontró el producto seleccionado.", "error");
+                return;
+            }
+
+            const nombre = opcionDOM.dataset.nombre || opcionDOM.text;
+            const precioCajaDB = parseFloat(opcionDOM.dataset.precio || 0); // precio_venta en DB = precio de la CAJA CERRADA
+            const bultoOriginal = parseInt(opcionDOM.dataset.bulto || 1);
+            const presentacion = opcionDOM.dataset.presentacion || "";
+            const bulto = esIndividual(presentacion) ? 1 : bultoOriginal;
+
+            const tipoVenta = document.querySelector('input[name="tipo_venta_carrito"]:checked').value;
+            const cantidad = parseInt(document.getElementById("carrito-cantidad").value || 1);
+            const bonificada = parseInt(document.getElementById("carrito-bonificada").value || 0);
+
+            if (cantidad <= 0) {
+                mostrarAlertaJS("⚠️ La cantidad a cobrar debe ser mayor a 0.", "error");
+                return;
+            }
+
+            // Precio según tipo: si vende caja → precio caja, si vende unidad suelta → precio / bulto
+            const precioItem = tipoVenta === 'bulto' ? precioCajaDB : precioCajaDB / bulto;
+            const subtotal = cantidad * precioItem;
+            const labelTipo = tipoVenta === 'bulto' ? `caja/s (x${bulto} u.)` : 'u.s.';
+
+            carrito.push({
+                id_producto: idProducto,
+                nombre: nombre,
+                cantidad: cantidad,
+                cantidad_bonificada: bonificada,
+                precio_unitario: precioItem,
+                subtotal: subtotal,
+                labelTipo: labelTipo,
+                tipo_venta: tipoVenta,
+                bulto_unidades: bulto
+            });
+
+            actualizarTablaCarrito();
+            // Resetear campos
+            document.getElementById("carrito-cantidad").value = 1;
+            document.getElementById("carrito-bonificada").value = 0;
+            selectVenta.clear();
+        }
+
+        function quitarDelCarrito(index) {
+            carrito.splice(index, 1);
+            actualizarTablaCarrito();
+        }
+
+        function limpiarCarrito() {
+            carrito = [];
+            actualizarTablaCarrito();
+        }
+
+        function actualizarTablaCarrito() {
+            const tbody = document.getElementById("carrito-tbody");
+            const contenedor = document.getElementById("carrito-contenedor");
+            tbody.innerHTML = "";
+            let total = 0;
+
+            carrito.forEach((item, i) => {
+                total += item.subtotal;
+                const bonStr = item.cantidad_bonificada > 0 ? ` +${item.cantidad_bonificada} regalo` : '';
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${i + 1}</td>
+                    <td style="font-weight:bold;">${item.nombre}</td>
+                    <td>${item.cantidad} ${item.labelTipo}</td>
+                    <td style="color:#f1c40f;">${item.cantidad_bonificada > 0 ? item.cantidad_bonificada : '-'}</td>
+                    <td>$${item.precio_unitario.toFixed(2)}</td>
+                    <td style="color:#2ecc71;font-weight:bold;">$${item.subtotal.toFixed(2)}</td>
+                    <td><button onclick="quitarDelCarrito(${i})" style="background:#e74c3c;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:13px;">🗑️ Quitar</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById("carrito-total").textContent = `$${total.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+            contenedor.style.display = carrito.length > 0 ? "block" : "none";
+        }
+
+        function confirmarRemito() {
+            if (carrito.length === 0) {
+                mostrarAlertaJS("⚠️ El remito está vacío. Agregá al menos un producto.", "error");
+                return;
+            }
+            if (!confirm(`¿Confirmar remito con ${carrito.length} producto(s) y descontar el stock?`)) return;
+
+            const fechaInput = document.getElementById("fecha-remito-input");
+            const fechaRemitoCustom = fechaInput ? fechaInput.value : "";
+
+            fetch('/vender_remito', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: carrito, fecha_remito: fechaRemitoCustom })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlertaJS(`✅ ${data.message}`, "success");
+                    limpiarCarrito();
+                    // Recargar la página para actualizar el stock visible
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    mostrarAlertaJS(`❌ ${data.message}`, "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarAlertaJS("❌ Error de conexión al confirmar el remito.", "error");
+            });
+        }
+
+        function descargarRemitoTicketPDF() {
+            if (carrito.length === 0) {
+                mostrarAlertaJS("⚠️ El remito está vacío.", "error");
+                return;
+            }
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, 160 + carrito.length * 14] });
+                const fecha = new Date().toLocaleString('es-AR', { hour12: false });
+                let y = 10;
+
+                doc.setFont("courier", "bold");
+                doc.setFontSize(11);
+                doc.text("ÓLEOS MINERALES SRL", 40, y, { align: "center" }); y += 5;
+                doc.setFont("courier", "normal");
+                doc.setFontSize(8);
+                doc.text("COMPROBANTE NO VÁLIDO COMO FACTURA", 40, y, { align: "center" }); y += 5;
+                doc.text(fecha, 40, y, { align: "center" }); y += 5;
+                doc.text("------------------------------------------", 40, y, { align: "center" }); y += 6;
+
+                let totalGeneral = 0;
+                carrito.forEach((item, i) => {
+                    doc.setFont("courier", "bold");
+                    doc.setFontSize(8);
+                    const lineas = doc.splitTextToSize(`${i+1}. ${item.nombre}`, 68);
+                    doc.text(lineas, 6, y); y += lineas.length * 4;
+                    doc.setFont("courier", "normal");
+                    doc.text(`   Cant: ${item.cantidad} ${item.labelTipo}${item.cantidad_bonificada > 0 ? ' +'+item.cantidad_bonificada+' regalo' : ''}`, 6, y); y += 4;
+                    doc.text(`   Subtotal: $${item.subtotal.toFixed(2)}`, 6, y); y += 5;
+                    totalGeneral += item.subtotal;
+                });
+
+                doc.text("------------------------------------------", 40, y, { align: "center" }); y += 7;
+                doc.setFont("courier", "bold");
+                doc.setFontSize(11);
+                doc.text(`TOTAL: $${totalGeneral.toFixed(2)}`, 6, y);
+
+                doc.save(`Remito_OleosMinerales_${Date.now()}.pdf`);
+            } catch(e) {
+                console.error(e);
+                mostrarAlertaJS("⚠️ Error al generar el PDF.", "error");
+            }
+        }
+
+
+
+        function guardarAjusteCajasUnidades(id_producto, bulto) {
+            const inputCajas = document.getElementById(`input-cajas-${id_producto}`);
+            const inputSueltas = document.getElementById(`input-sueltas-${id_producto}`);
+            
+            const cajas = inputCajas ? parseInt(inputCajas.value || 0) : 0;
+            const sueltas = inputSueltas ? parseInt(inputSueltas.value || 0) : 0;
+            
+            const nuevo_stock = (cajas * bulto) + sueltas;
+
+            fetch('/api/actualizar_stock_ajax', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_producto: id_producto, nuevo_stock: nuevo_stock })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlertaJS(`✅ Stock actualizado correctamente (${data.nuevo_stock} u.)`, 'success');
+                    actualizarStockFilaVisual(id_producto, data.nuevo_stock);
+                } else {
+                    mostrarAlertaJS(`⚠️ Error: ${data.message}`, 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarAlertaJS("⚠️ Fallo al actualizar stock", "error");
+            });
+        }
+
+        function actualizarStockFilaVisual(id_producto, nuevo_stock) {
+            const fila = document.querySelector(`tr[data-id="${id_producto}"]`);
+            if (fila) {
+                fila.dataset.stock = nuevo_stock;
+                const bultoOriginal = parseInt(fila.dataset.bulto || 1);
+                const presentacion = fila.dataset.presentacion || "";
+                const bulto = esIndividual(presentacion) ? 1 : bultoOriginal;
+                const stockActual = parseInt(nuevo_stock);
+                let stockVisual = "";
+
+                // Calcular valores normalizados
+                const cajasNormalizadas = bulto > 1 ? Math.floor(stockActual / bulto) : 0;
+                const sueltasNormalizadas = bulto > 1 ? stockActual % bulto : stockActual;
+
+                // Actualizar los valores de los inputs en caliente para normalizarlos
+                const inputCajas = document.getElementById(`input-cajas-${id_producto}`);
+                const inputSueltas = document.getElementById(`input-sueltas-${id_producto}`);
+                if (inputCajas) inputCajas.value = cajasNormalizadas;
+                if (inputSueltas) inputSueltas.value = sueltasNormalizadas;
+
+                if (bulto > 1) {
+                    if (cajasNormalizadas > 0 && sueltasNormalizadas > 0) {
+                        stockVisual = `${cajasNormalizadas} cajas + ${sueltasNormalizadas} unids. (${stockActual} unids.)`;
+                    } else if (cajasNormalizadas > 0) {
+                        stockVisual = `${cajasNormalizadas} cajas (${stockActual} unids.)`;
+                    } else {
+                        stockVisual = `${sueltasNormalizadas} unids.`;
+                    }
+                } else {
+                    stockVisual = `${stockActual} unids.`;
+                }
+
+                // Celda 6 (Stock Actual)
+                const celdaStock = fila.cells[6];
+                if (celdaStock) {
+                    if (stockActual <= 5) {
+                        celdaStock.innerHTML = `<span class="stock-low">⚠️ ${stockVisual}</span>`;
+                    } else {
+                        celdaStock.innerHTML = `<span class="stock-ok">${stockVisual}</span>`;
+                    }
+                }
+            }
+        }
+
+        function buscarProductoPorCodigo(codigo) {
+            codigo = codigo.trim().toUpperCase();
+            if (!codigo) return;
+
+            fetch(`/api/producto/${encodeURIComponent(codigo)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Producto no encontrado");
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const prod = data.producto;
+                        
+                        // Validar el modo de conteo actual
+                        const modoRapido = document.querySelector('input[name="modo-conteo-inv"]:checked').value === 'rapido';
+                        
+                        if (modoRapido) {
+                            sumarUnoAjax(prod.id);
+                        } else {
+                            document.getElementById("scan-id-producto").value = prod.id;
+                            document.getElementById("scan-nombre").textContent = prod.nombre;
+                            document.getElementById("scan-detalles").textContent = `Código: ${prod.codigo} | Viscosidad: ${prod.viscosidad} | Envase: ${prod.presentacion} (x${prod.bulto} u.)`;
+                            document.getElementById("scan-stock").textContent = prod.stock;
+                            document.getElementById("scan-nuevo-stock").value = prod.stock;
+                            document.getElementById("resultado-escaneo").style.display = "block";
+                            setTimeout(() => {
+                                const inputNuevoStock = document.getElementById("scan-nuevo-stock");
+                                if (inputNuevoStock) {
+                                    inputNuevoStock.focus();
+                                    inputNuevoStock.select();
+                                }
+                            }, 150);
+                        }
+                    }
+                })
+                .catch(err => {
+                    alert(`⚠️ No se encontró ningún producto con el código: ${codigo}`);
+                    const inputScanner = document.getElementById("input-codigo-scanner");
+                    if (inputScanner) {
+                        inputScanner.value = "";
+                        inputScanner.focus();
+                    }
+                });
+        }
+
+        function esIndividual(presentacion) {
+            if (!presentacion) return false;
+            const p = presentacion.toUpperCase();
+            return p.includes("BALDE") || p.includes("TAMBOR") || p.includes("TBR") || p.includes("CONTENEDOR") || p.includes("GRANEL");
+        }
+
+        function actualizarPreciosModalEnTiempoReal() {
+            const presentacion = document.getElementById("edit-presentacion").value;
+            const bultoOriginal = parseInt(document.getElementById("edit-bulto").value || 1);
+            const bulto = esIndividual(presentacion) ? 1 : bultoOriginal;
+            
+            const ventaUnit = parseFloat(document.getElementById("edit-venta").value || 0);
+            const precioCajaTotal = ventaUnit * bulto;
+            
+            document.getElementById("modal-precio-bulto").textContent = `$${precioCajaTotal.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+            document.getElementById("modal-precio-unitario").textContent = `$${ventaUnit.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+        }
+
         function lanzarModal(tr) {
+            let id = tr.dataset.id;
             let codigo = tr.dataset.codigo;
             let nombre = tr.dataset.nombre;
             let viscosidad = tr.dataset.viscosidad;
             let presentacion = tr.dataset.presentacion;
             let bulto = parseInt(tr.dataset.bulto);
-            let precioVentaFinal = parseFloat(tr.dataset.venta);
+            let precioCosto = parseFloat(tr.dataset.costo);
+            let precioCaja = parseFloat(tr.dataset.venta);  // precio_venta en DB = precio de la CAJA CERRADA
+
+            // Si es un balde/tambor, para la UI del modal se considera bulto = 1
+            if (esIndividual(presentacion)) {
+                bulto = 1;
+            }
+
+            // Separar marca y nombre de línea del nombre completo
+            let partes = nombre.includes(' - ') ? nombre.split(' - ') : ['', nombre];
+            let marcaActual = partes[0].trim();
+            let nombreLineaActual = partes.slice(1).join(' - ').trim();
 
             document.getElementById("modal-titulo").textContent = nombre;
             document.getElementById("modal-subtitulo").textContent = `Código: ${codigo} | Viscosidad: ${viscosidad} | Envase: ${presentacion} (Bulto x${bulto} u.)`;
-            
-            let precioUnitarioFinal = precioVentaFinal / bulto;
 
-            document.getElementById("modal-precio-bulto").textContent = `$${precioVentaFinal.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
-            document.getElementById("modal-precio-unitario").textContent = `$${precioUnitarioFinal.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+            // Precio por envase = precio caja ÷ unidades por bulto
+            let precioEnvase = precioCaja / bulto;
+            document.getElementById("modal-precio-bulto").textContent = `$${precioCaja.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+            document.getElementById("modal-precio-unitario").textContent = `$${precioEnvase.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
+
+            // Poblar todos los campos del formulario de edición completa
+            document.getElementById("edit-id-producto").value = id;
+            document.getElementById("edit-marca").value = marcaActual;
+            document.getElementById("edit-nombre-linea").value = nombreLineaActual;
+            document.getElementById("edit-viscosidad").value = viscosidad === 'None' ? '' : viscosidad;
+            document.getElementById("edit-presentacion").value = presentacion === 'None' ? '' : presentacion;
+            document.getElementById("edit-bulto").value = bulto || 1;
+            document.getElementById("edit-codigo").value = (codigo === "None" || !codigo) ? "" : codigo;
+            document.getElementById("edit-costo").value = (precioCosto / bulto).toFixed(2);
+            document.getElementById("edit-venta").value = (precioCaja / bulto).toFixed(2);
 
             document.getElementById("modal-detalle").style.display = "flex";
         }
@@ -926,6 +2341,48 @@
             }
         }
 
+        function filtrarTablaReposicion() {
+            let input = document.getElementById("buscador-reposicion");
+            let terminos = input.value.toUpperCase().trim().split(/\s+/);
+            let table = document.getElementById("tabla-reposicion");
+            let trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+            for (let i = 0; i < trs.length; i++) {
+                let textoFila = (trs[i].textContent || trs[i].innerText).toUpperCase();
+                let coincide = terminos.every(t => textoFila.includes(t));
+                trs[i].style.display = coincide ? "" : "none";
+            }
+        }
+
+        function guardarAjusteReposicion(id_producto, bulto) {
+            const inputCajas = document.getElementById(`input-cajas-rep-${id_producto}`);
+            const inputSueltas = document.getElementById(`input-sueltas-rep-${id_producto}`);
+            
+            const cajas = inputCajas ? parseInt(inputCajas.value || 0) : 0;
+            const sueltas = inputSueltas ? parseInt(inputSueltas.value || 0) : 0;
+            
+            const nuevo_stock = (cajas * bulto) + sueltas;
+            
+            fetch('/api/actualizar_stock_ajax', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_producto: id_producto, nuevo_stock: nuevo_stock, incrementar_uno: false })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlertaJS(`✅ Stock repuesto: ${data.nombre} (${data.nuevo_stock} u.)`, 'success');
+                    actualizarStockFilaVisual(id_producto, data.nuevo_stock);
+                } else {
+                    mostrarAlertaJS(`⚠️ Error: ${data.message}`, 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                mostrarAlertaJS("⚠️ Fallo al conectar con el servidor", "error");
+            });
+        }
+
         function actualizarReloj() {
             const ahora = new Date();
             document.getElementById('reloj-hora').textContent = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}:${String(ahora.getSeconds()).padStart(2, '0')}`;
@@ -939,30 +2396,401 @@
             for (let i = 0; i < contents.length; i++) contents[i].classList.remove("active");
             document.getElementById(tabName).classList.add("active");
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Guardar pestaña activa en memoria local del navegador
+            localStorage.setItem('active_tab', tabName);
+
+            // Adaptar layout horizontal para el mostrador y reposición (ocupa 100% de pantalla)
+            if (['inventario', 'reposicion', 'deposito', 'metricas'].includes(tabName)) {
+                document.body.classList.add('mostrador-layout');
+            } else {
+                document.body.classList.remove('mostrador-layout');
+            }
+
+            // Autofoco optimizado para lectores de barras físicos USB
+            if (tabName === 'escanear') {
+                setTimeout(function() {
+                    const inputScanner = document.getElementById("input-codigo-scanner");
+                    if (inputScanner) {
+                        inputScanner.focus();
+                        inputScanner.select();
+                    }
+                }, 150);
+            } else if (tabName === 'venta') {
+                setTimeout(function() {
+                    if (selectVentaControl) selectVentaControl.focus();
+                }, 150);
+            } else if (tabName === 'reservas') {
+                setTimeout(function() {
+                    if (selectReservaControl) selectReservaControl.focus();
+                }, 150);
+            } else if (tabName === 'cargar') {
+                setTimeout(function() {
+                    const inputCargar = document.getElementById("input-codigo-cargar");
+                    if (inputCargar) inputCargar.focus();
+                }, 150);
+            }
         }
 
-        // AUTO-REFRESH EN SEGUNDO PLANO CADA 10 SEGUNDOS
+        // AUTO-REFRESH EN SEGUNDO PLANO CADA 10 SEGUNDOS (Optimizado usando la API JSON para bajo consumo)
         setInterval(function() {
-            fetch('/')
-                .then(response => response.text())
-                .then(html => {
-                    let parser = new DOMParser();
-                    let doc = parser.parseFromString(html, 'text/html');
-                    
-                    let nuevaTablaRes = doc.querySelector("#reservas table");
-                    let tablaActualRes = document.querySelector("#reservas table");
-                    if (nuevaTablaRes && tablaActualRes) {
-                        tablaActualRes.innerHTML = nuevaTablaRes.innerHTML;
-                    }
-
-                    let nuevoCount = doc.querySelector("#count-reservas-dash");
-                    let actualCount = document.querySelector("#count-reservas-dash");
-                    if (nuevoCount && actualCount) {
-                        actualCount.textContent = nuevoCount.textContent;
+            fetch('/api/reservas_pendientes')
+                .then(response => {
+                    if (!response.ok) throw new Error("Fallo de red");
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Actualizar contador del dashboard
+                        let countSpan = document.getElementById("count-reservas-dash");
+                        if (countSpan) countSpan.textContent = data.count;
+                        
+                        // Reconstruir la tabla de reservas de forma reactiva y rápida
+                        let tbody = document.querySelector("#reservas table tbody");
+                        if (tbody) {
+                            if (data.reservas.length === 0) {
+                                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #b0b9c6;">No hay reservas pendientes.</td></tr>';
+                            } else {
+                                let html = "";
+                                data.reservas.forEach(r => {
+                                    const stockSuficiente = r.stock_actual >= r.cantidad;
+                                    const badgeStock = stockSuficiente 
+                                        ? `<span class="stock-ok">✅ ${r.stock_actual} Disponibles</span>` 
+                                        : `<span class="stock-low">❌ Solo ${r.stock_actual} en Stock</span>`;
+                                    
+                                    const botonAprobar = stockSuficiente 
+                                        ? `<a href="/aprobar_reserva/${r.id}" class="btn-approve">Aprobar y Descontar</a>` 
+                                        : "";
+                                    
+                                    html += `
+                                    <tr>
+                                        <td><b>#${r.id}</b></td>
+                                        <td><b>${r.vendedor}</b></td>
+                                        <td><span class="badge">${r.producto_nombre}</span> (${r.viscosidad})</td>
+                                        <td><b>${r.cantidad} unid.</b></td>
+                                        <td>${badgeStock}</td>
+                                        <td><small>${r.fecha}</small></td>
+                                        <td class="action-buttons-cell">
+                                            ${botonAprobar}
+                                            <a href="/rechazar_reserva/${r.id}" class="btn-reject">Rechazar</a>
+                                        </td>
+                                    </tr>`;
+                                });
+                                tbody.innerHTML = html;
+                            }
+                        }
                     }
                 })
                 .catch(err => console.log("Sincronizando...", err));
         }, 10000);
+
+        // FUNCIONES DE SINCRONIZACIÓN Y PERFIL
+        function abrirModalSync() {
+            const inputIp = document.getElementById('sync-ip-mostrador');
+            const savedIp = localStorage.getItem('oleos_mostrador_ip') || '';
+            if (inputIp && savedIp) inputIp.value = savedIp;
+            const statusDiv = document.getElementById('sync-status');
+            if (statusDiv) { statusDiv.style.display = 'none'; statusDiv.innerHTML = ''; }
+            document.getElementById('modal-sync').style.display = 'flex';
+        }
+
+        function cerrarModalSync() {
+            document.getElementById('modal-sync').style.display = 'none';
+        }
+
+        function abrirModalPinAdmin() {
+            document.getElementById('modal-pin-admin').style.display = 'flex';
+        }
+
+        function cerrarModalPinAdmin() {
+            document.getElementById('modal-pin-admin').style.display = 'none';
+        }
+
+        function enviarSyncMostrador() {
+            const ipInput = document.getElementById('sync-ip-mostrador');
+            const ip = ipInput ? ipInput.value.trim() : '';
+            if (!ip) {
+                alert("Por favor ingrese la IP de la computadora de Mostrador.");
+                return;
+            }
+
+            localStorage.setItem('oleos_mostrador_ip', ip);
+
+            const btn = document.getElementById('btn-sync-enviar');
+            const status = document.getElementById('sync-status');
+            btn.disabled = true;
+            btn.textContent = "⏳ Enviando catálogo...";
+            status.style.display = 'block';
+            status.style.color = '#3498db';
+            status.textContent = "Enviando base de datos por Wi-Fi...";
+
+            fetch('/api/sync/enviar_mostrador', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ip_mostrador: ip })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.textContent = "🚀 Enviar Catálogo al Mostrador Ahora";
+                if (data.success) {
+                    status.style.color = '#2ecc71';
+                    status.textContent = data.message;
+                    mostrarAlertaJS(data.message, 'success');
+                } else {
+                    status.style.color = '#e74c3c';
+                    status.textContent = data.message;
+                    mostrarAlertaJS(data.message, 'error');
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.textContent = "🚀 Enviar Catálogo al Mostrador Ahora";
+                status.style.color = '#e74c3c';
+                status.textContent = "❌ Error de conexión al enviar.";
+                mostrarAlertaJS("Error de conexión al enviar datos", 'error');
+            });
+        }
+
+        // Inicializar fecha por defecto del remito a la fecha de hoy
+        document.addEventListener('DOMContentLoaded', () => {
+            const fechaInput = document.getElementById('fecha-remito-input');
+            if (fechaInput && !fechaInput.value) {
+                const hoy = new Date();
+                const year = hoy.getFullYear();
+                const month = String(hoy.getMonth() + 1).padStart(2, '0');
+                const day = String(hoy.getDate()).padStart(2, '0');
+                fechaInput.value = `${year}-${month}-${day}`;
+            }
+        });
+
+        function cambiarPeriodoMetricas(mes) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('mes', mes);
+            url.searchParams.set('tab', 'metricas');
+            window.location.href = url.toString();
+        }
+
+        function descargarTicketCierrePDF(mes, operaciones, litrosLiq, kgGrasas, facturacion, totalVolumen) {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, 175] });
+                const fechaEmision = new Date().toLocaleString('es-AR', { hour12: false });
+                let y = 10;
+
+                doc.setFont("courier", "bold");
+                doc.setFontSize(11);
+                doc.text("ÓLEOS MINERALES SRL", 40, y, { align: "center" }); y += 5;
+                doc.setFontSize(9);
+                doc.text("CIERRE MENSUAL DE VENTAS", 40, y, { align: "center" }); y += 5;
+                doc.setFont("courier", "normal");
+                doc.setFontSize(8);
+                doc.text(`Periodo: ${mes}`, 40, y, { align: "center" }); y += 4;
+                doc.text(`Emitido: ${fechaEmision}`, 40, y, { align: "center" }); y += 4;
+                doc.text("------------------------------------------", 40, y, { align: "center" }); y += 6;
+
+                doc.setFont("courier", "bold");
+                doc.setFontSize(9);
+                doc.text("RESUMEN GENERAL DEL MES:", 6, y); y += 6;
+
+                doc.setFont("courier", "normal");
+                doc.setFontSize(8.5);
+                doc.text(`Ventas / Items:      ${operaciones}`, 6, y); y += 5;
+                doc.text(`Aceites y Líquidos:  ${parseFloat(litrosLiq || 0).toFixed(2)} Lts`, 6, y); y += 5;
+                doc.text(`Grasas Lubricantes:  ${parseFloat(kgGrasas || 0).toFixed(2)} Kg`, 6, y); y += 5;
+                doc.text(`Volumen Total:       ${parseFloat(totalVolumen || 0).toFixed(2)} Lts/Kg`, 6, y); y += 5;
+                doc.text(`Total Facturado:     $${parseFloat(facturacion || 0).toLocaleString('es-AR', {minimumFractionDigits: 2})}`, 6, y); y += 7;
+
+                doc.text("------------------------------------------", 40, y, { align: "center" }); y += 6;
+                doc.setFont("courier", "bold");
+                doc.setFontSize(10);
+                doc.text(`TOTAL FACTURADO:`, 6, y); y += 5;
+                doc.text(`$${parseFloat(facturacion || 0).toLocaleString('es-AR', {minimumFractionDigits: 2})}`, 6, y); y += 8;
+                doc.setFontSize(7);
+                doc.setFont("courier", "italic");
+                doc.text("Comprobante de auditoría de cierre mensual.", 40, y, { align: "center" });
+
+                doc.save(`Cierre_Mensual_${mes}_OleosMinerales.pdf`);
+            } catch(e) {
+                console.error(e);
+                mostrarAlertaJS("⚠️ Error al generar el ticket de cierre PDF.", "error");
+            }
+        }
+
+        // ==========================================
+        // GESTIÓN DE AUDITORÍA Y DETALLE DE REMITOS
+        // ==========================================
+        let remitoActualDetalle = null;
+
+        function filtrarTablaRemitos() {
+            const selectMes = document.getElementById('filtro-mes-remito');
+            const mesSeleccionado = selectMes ? selectMes.value : 'todos';
+            const buscadorInput = document.getElementById('buscador-remitos');
+            const busqueda = (buscadorInput ? buscadorInput.value : '').toLowerCase().trim();
+            const filas = document.querySelectorAll('.fila-remito');
+            let visibles = 0;
+            let sumaLitros = 0;
+            let sumaMonto = 0;
+
+            filas.forEach(fila => {
+                const mesFila = fila.getAttribute('data-mes') || '';
+                const textoBusqueda = (fila.getAttribute('data-busqueda') || '').toLowerCase();
+                const litrosFila = parseFloat(fila.getAttribute('data-litros') || 0);
+                const montoFila = parseFloat(fila.getAttribute('data-monto') || 0);
+
+                const coincideMes = (mesSeleccionado === 'todos' || mesFila === mesSeleccionado);
+                const coincideBusqueda = (!busqueda || textoBusqueda.includes(busqueda));
+
+                if (coincideMes && coincideBusqueda) {
+                    fila.style.display = '';
+                    visibles++;
+                    sumaLitros += litrosFila;
+                    sumaMonto += montoFila;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+
+            const resumenKpi = document.getElementById('resumen-kpi-remitos');
+            if (resumenKpi) {
+                resumenKpi.innerHTML = `Mostrando <b>${visibles}</b> remitos &bull; 💧 <b>${sumaLitros.toFixed(2)} Lts/Kg</b> &bull; 💵 <b>$${sumaMonto.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b>`;
+            }
+
+            const trSin = document.getElementById('tr-sin-remitos');
+            if (trSin) {
+                trSin.style.display = (visibles === 0) ? '' : 'none';
+            }
+        }
+
+        async function abrirModalDetalleRemito(fecha) {
+            const modal = document.getElementById('modal-detalle-remito');
+            if (!modal) return;
+            modal.style.display = 'flex';
+            document.getElementById('modal-remito-badge-fecha').innerText = '🕒 ' + fecha;
+            document.getElementById('modal-remito-items-count').innerText = '...';
+            document.getElementById('modal-remito-volumen-total').innerText = '...';
+            document.getElementById('modal-remito-monto-total').innerText = '...';
+            const tbody = document.getElementById('modal-remito-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 25px; color: #b0b9c6;">⏳ Obteniendo detalle completo del remito...</td></tr>';
+
+            try {
+                const resp = await fetch('/api/remito_detalle?fecha=' + encodeURIComponent(fecha));
+                const data = await resp.json();
+                if (!data.success) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #e74c3c; padding: 20px;">❌ Error: ${data.message || 'No se pudo cargar'}</td></tr>`;
+                    return;
+                }
+
+                remitoActualDetalle = data;
+                document.getElementById('modal-remito-items-count').innerText = data.total_items + ' artículos';
+                
+                let volText = '';
+                if (data.total_litros_liq > 0 && data.total_kg_grasa > 0) {
+                    volText = `${data.total_litros_liq.toFixed(2)} Lts + ${data.total_kg_grasa.toFixed(2)} Kg`;
+                } else if (data.total_kg_grasa > 0) {
+                    volText = `${data.total_kg_grasa.toFixed(2)} Kg`;
+                } else {
+                    volText = `${data.total_litros_liq.toFixed(2)} Lts`;
+                }
+                document.getElementById('modal-remito-volumen-total').innerText = volText;
+                document.getElementById('modal-remito-monto-total').innerText = '$' + Number(data.total_monto).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                tbody.innerHTML = '';
+                data.items.forEach((item, idx) => {
+                    const tr = document.createElement('tr');
+                    const esGrasa = item.tipo_producto === 'GRASA';
+                    const badgeTipo = esGrasa 
+                        ? '<span style="background: rgba(230, 126, 34, 0.2); color: #e67e22; border: 1px solid #e67e22; padding: 1px 6px; border-radius: 4px; font-size: 11px; margin-left: 6px;">🧈 Grasa</span>'
+                        : (item.viscosidad && item.viscosidad !== 'N/A' 
+                            ? `<span style="background: #242b3d; color: #3498db; border: 1px solid #34495e; padding: 1px 6px; border-radius: 4px; font-size: 11px; margin-left: 6px;">💧 ${item.viscosidad}</span>` 
+                            : '');
+                    
+                    const volDisplay = esGrasa 
+                        ? `<b style="color: #e67e22;">${item.volumen.toFixed(2)} Kg</b>` 
+                        : `<b style="color: #3498db;">${item.volumen.toFixed(2)} Lts</b>`;
+
+                    tr.innerHTML = `
+                        <td style="text-align: center; color: #8892b0; font-weight: bold;">${idx + 1}</td>
+                        <td>
+                            <div style="font-weight: bold; color: #ffffff; font-size: 14px;">${item.nombre}</div>
+                            <div style="font-size: 12px; color: #8892b0; margin-top: 2px;">
+                                Marca: <b style="color: #ecf0f1;">${item.marca || '-'}</b> ${badgeTipo}
+                            </div>
+                        </td>
+                        <td style="color: #b0b9c6; font-size: 13px;">${item.presentacion || '-'}</td>
+                        <td style="text-align: center; font-weight: bold; font-size: 14px; color: #f1c40f;">${item.cantidad} u.</td>
+                        <td style="text-align: right; font-size: 13px;">${volDisplay}</td>
+                        <td style="text-align: right; font-weight: bold; color: #2ecc71; font-size: 14px;">
+                            $${Number(item.precio_total).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (err) {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #e74c3c; padding: 20px;">❌ Error de conexión al cargar detalle.</td></tr>';
+            }
+        }
+
+        function cerrarModalDetalleRemito() {
+            const modal = document.getElementById('modal-detalle-remito');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function descargarTicketRemitoHistoricoPDF() {
+            if (!remitoActualDetalle || !remitoActualDetalle.items || remitoActualDetalle.items.length === 0) {
+                mostrarAlertaJS("⚠️ No hay datos cargados para generar el comprobante.", "error");
+                return;
+            }
+            try {
+                const { jsPDF } = window.jspdf;
+                const items = remitoActualDetalle.items;
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, 160 + items.length * 14] });
+                let y = 10;
+
+                doc.setFont("courier", "bold");
+                doc.setFontSize(11);
+                doc.text("ÓLEOS MINERALES SRL", 40, y, { align: "center" }); y += 5;
+                doc.setFont("courier", "normal");
+                doc.setFontSize(8);
+                doc.text("COMPROBANTE DE REMITO / DESPACHO", 40, y, { align: "center" }); y += 5;
+                doc.text(`Fecha: ${remitoActualDetalle.fecha}`, 40, y, { align: "center" }); y += 5;
+                doc.text("------------------------------------------", 40, y, { align: "center" }); y += 6;
+
+                items.forEach((item, i) => {
+                    doc.setFont("courier", "bold");
+                    doc.setFontSize(8);
+                    const lineas = doc.splitTextToSize(`${i+1}. ${item.nombre}`, 68);
+                    doc.text(lineas, 6, y); y += lineas.length * 4;
+                    doc.setFont("courier", "normal");
+                    const esGrasa = item.tipo_producto === 'GRASA';
+                    const unidadVol = esGrasa ? 'Kg' : 'Lts';
+                    doc.text(`   Cant: ${item.cantidad} u. | Vol: ${item.volumen.toFixed(2)} ${unidadVol}`, 6, y); y += 4;
+                    doc.text(`   Subtotal: $${item.precio_total.toFixed(2)}`, 6, y); y += 5;
+                });
+
+                doc.text("------------------------------------------", 40, y, { align: "center" }); y += 6;
+                doc.setFont("courier", "bold");
+                doc.setFontSize(9);
+                doc.text(`VOLUMEN: ${remitoActualDetalle.total_litros.toFixed(2)} Lts/Kg`, 6, y); y += 5;
+                doc.setFontSize(11);
+                doc.text(`TOTAL: $${remitoActualDetalle.total_monto.toFixed(2)}`, 6, y);
+
+                const safeDate = remitoActualDetalle.fecha.replace(/[^0-9]/g, '_');
+                doc.save(`Remito_${safeDate}.pdf`);
+            } catch (e) {
+                console.error(e);
+                mostrarAlertaJS("⚠️ Error al generar el PDF del remito.", "error");
+            }
+        }
+
+        window.addEventListener('click', function(e) {
+            const modalRemito = document.getElementById('modal-detalle-remito');
+            if (e.target === modalRemito) {
+                cerrarModalDetalleRemito();
+            }
+        });
     </script>
 </body>
 </html>
