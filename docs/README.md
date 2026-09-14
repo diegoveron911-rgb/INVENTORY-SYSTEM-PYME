@@ -17,6 +17,7 @@ Esta base te servirá tanto para dominar el mantenimiento del sistema actual de 
 | **[04. Lógica de Negocio y Flujos](./04_LOGICA_DE_NEGOCIO_Y_FLUJOS.md)** | Algoritmos de descuento de stock (cajas vs botellas), métricas (Litros vs Kilos), roles (Admin vs Mostrador), lector de barras y sincronización Wi-Fi. |
 | **[05. Guía de Reutilización para Otras PyMEs](./05_GUIA_DE_REUTILIZACION_PARA_OTRAS_PYMES.md)** | Manual paso a paso para clonar este Backend y crear sistemas a medida para otros comercios cambiando el Frontend. |
 | **[06. Caso Real: Auditoría Forense y Conciliación](./06_CASO_REAL_AUDITORIA_Y_CONCILIACION_DE_STOCK.md)** | Caso práctico real (Sept 2026): resolución de discrepancia de 2.100 L vs Excel, corrección de bug de grasas, conciliación L/Kg y migración WAL. |
+| **[07. Hoja de Ruta e Integraciones Futuras](./07_HOJA_DE_RUTA_INTEGRACIONES_FUTURAS_ARCA_MP_REMITOS.md)** | Blueprint de ingeniería para incorporar Precios dinámicos, Remitos/Tickets digitales, ARCA (ex-AFIP) y cobros con Mercado Pago (QR y Point). |
 
 ---
 
